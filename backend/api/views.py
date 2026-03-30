@@ -79,10 +79,14 @@ class GigApplicationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return self.queryset.filter(
+        qs = self.queryset.filter(
             models.Q(student_profile__user=self.request.user) |
             models.Q(gig__client_profile__user=self.request.user)
         )
+        gig_id = self.request.query_params.get('gig_id')
+        if gig_id:
+            qs = qs.filter(gig_id=gig_id)
+        return qs
 
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()

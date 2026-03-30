@@ -100,7 +100,7 @@ export default function PublicPortfolioPage() {
                   <MapPin className="h-4 w-4" /> {profile.location || "Earth"}
                 </span>
                 <span className="flex items-center gap-1 text-sm font-medium">
-                  <Globe className="h-4 w-4" /> {profile.school || "Student"}
+                  <Globe className="h-4 w-4" /> {profile.school || (profile.role === "client" ? "Client" : "Student")}
                 </span>
               </div>
             </div>

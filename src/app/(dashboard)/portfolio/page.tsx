@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
+import { Badge } from "@/components/ui/badge";
 import {
   Plus,
   Trash2,
@@ -15,6 +16,7 @@ import {
   Link as LinkIcon,
   Video,
   Loader2,
+  X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -24,6 +26,9 @@ export default function PortfolioPage() {
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
   
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+
   const [newSample, setNewSample] = useState({
     title: "",
     description: "",
@@ -31,6 +36,25 @@ export default function PortfolioPage() {
     link: "",
     media: null as File | null,
   });
+
+  function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addTag();
+    }
+  }
+
+  function addTag() {
+    const trimmed = tagInput.trim().replace(/,+$/, "").trim();
+    if (trimmed && !tags.includes(trimmed)) {
+      setTags([...tags, trimmed]);
+    }
+    setTagInput("");
+  }
+
+  function removeTag(tag: string) {
+    setTags(tags.filter((t) => t !== tag));
+  }
 
   useEffect(() => {
     if (!profile) return;
@@ -66,8 +90,12 @@ export default function PortfolioPage() {
         formData.append("media", newSample.media);
       }
 
+      if (tags.length > 0) {
+        formData.append("tags", JSON.stringify(tags));
+      }
+
       await api.workSamples.create(formData, true);
-      
+
       setNewSample({
         title: "",
         description: "",
@@ -75,6 +103,8 @@ export default function PortfolioPage() {
         link: "",
         media: null,
       });
+      setTags([]);
+      setTagInput("");
       loadSamples();
     } catch (err) {
       console.error("Error adding sample:", err);
@@ -171,6 +201,37 @@ export default function PortfolioPage() {
                 rows={3}
               />
 
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-gray-700">Skill Tags</label>
+                <Input
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={handleTagKeyDown}
+                  onBlur={addTag}
+                  placeholder="Type a skill and press Enter"
+                />
+                {tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border-indigo-100 flex items-center gap-1"
+                      >
+                        {tag}
+                        <button
+                          type="button"
+                          onClick={() => removeTag(tag)}
+                          className="hover:text-red-600 transition-colors cursor-pointer"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <Button type="submit" fullWidth loading={adding}>
                 <Plus className="h-4 w-4" /> Add to Portfolio
               </Button>
@@ -220,6 +281,19 @@ export default function PortfolioPage() {
                       <p className="text-sm text-gray-500 line-clamp-2 mt-1">
                         {sample.description}
                       </p>
+                      {sample.tags?.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {sample.tags.map((tag: string) => (
+                            <Badge
+                              key={tag}
+                              variant="secondary"
+                              className="text-xs px-1.5 py-0 bg-indigo-50 text-indigo-700 border-indigo-100"
+                            >
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
                       {sample.link && (
                         <a
                           href={sample.link}

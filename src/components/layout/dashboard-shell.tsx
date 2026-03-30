@@ -71,6 +71,9 @@ export function DashboardShell({ children }: DashboardShellProps) {
                     {profile.name || "Set up profile"}
                   </p>
                   <div className="flex items-center gap-1">
+                    <Badge variant="secondary" className="text-xs capitalize">
+                      {profile.role}
+                    </Badge>
                     {profile.is_premium && (
                       <Badge variant="premium">
                         <Crown className="h-3 w-3 mr-1" /> Premium

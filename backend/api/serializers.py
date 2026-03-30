@@ -43,6 +43,17 @@ class WorkSampleSerializer(serializers.ModelSerializer):
         model = WorkSample
         fields = '__all__'
 
+    def to_internal_value(self, data):
+        # When tags arrive as a JSON string (from FormData), parse them
+        if 'tags' in data and isinstance(data.get('tags'), str):
+            import json
+            try:
+                data = data.copy()
+                data['tags'] = json.loads(data['tags'])
+            except (json.JSONDecodeError, TypeError):
+                pass
+        return super().to_internal_value(data)
+
 class GigSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='client_profile.name', read_only=True)
     
@@ -52,11 +63,22 @@ class GigSerializer(serializers.ModelSerializer):
 
 class GigApplicationSerializer(serializers.ModelSerializer):
     student_name = serializers.CharField(source='student_profile.name', read_only=True)
+    student_discipline = serializers.CharField(source='student_profile.discipline', read_only=True)
+    student_avatar = serializers.SerializerMethodField()
+    student_username = serializers.CharField(source='student_profile.username', read_only=True)
     gig_title = serializers.CharField(source='gig.title', read_only=True)
-    
+
     class Meta:
         model = GigApplication
         fields = '__all__'
+
+    def get_student_avatar(self, obj):
+        if obj.student_profile.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.student_profile.avatar.url)
+            return obj.student_profile.avatar.url
+        return None
 
 class MessageSerializer(serializers.ModelSerializer):
     sender_name = serializers.CharField(source='sender.name', read_only=True)

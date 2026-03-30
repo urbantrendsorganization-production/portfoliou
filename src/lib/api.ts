@@ -156,8 +156,9 @@ export const api = {
 
   // ── Gig Applications ─────────────────────
   gigApplications: {
-    list: async () => {
-      const data = await apiRequest('gig-applications/');
+    list: async (gigId?: number) => {
+      const query = gigId ? `?gig_id=${gigId}` : '';
+      const data = await apiRequest(`gig-applications/${query}`);
       return extractResults(data);
     },
     create: (body: any) =>

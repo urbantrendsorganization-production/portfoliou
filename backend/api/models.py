@@ -59,6 +59,7 @@ class WorkSample(models.Model):
     media = models.FileField(upload_to='work_samples/', null=True, blank=True)
     link = models.URLField(max_length=500, blank=True)
     thumbnail = models.ImageField(upload_to='thumbnails/', null=True, blank=True)
+    tags = models.JSONField(default=list, blank=True)
     sort_order = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 

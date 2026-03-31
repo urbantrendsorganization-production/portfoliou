@@ -74,14 +74,18 @@ function SignupForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-16 px-4 py-12">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-white" />
+        <div className="text-center mb-4">
+          <Link href="/" className="inline-flex items-center gap-2 mb-2">
+            <div className="rounded-xl bg-gradient-to-br flex items-center justify-center">
+              <img
+                src="https://res.cloudinary.com/dvifkm1ex/image/upload/v1774943398/PortfolioU_1_bqx4cv.png"
+                alt="Logo"
+                className="w-10" // Adjust w-10 (2.5rem) to your preferred size
+              />
             </div>
-            <span className="font-bold text-2xl text-gray-900">
-              Portfolio<span className="text-indigo-600">U</span>
-            </span>
+            {/* <span className="font-bold text-2xl text-gray-900">
+              Portfolio<span className="text-blue-600">U</span>
+            </span> */}
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">
             Create your account

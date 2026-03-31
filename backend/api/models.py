@@ -25,6 +25,7 @@ class Profile(models.Model):
     discipline = models.CharField(max_length=100, choices=DISCIPLINE_CHOICES, blank=True)
     bio = models.TextField(blank=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    cover_image = models.ImageField(upload_to='covers/', null=True, blank=True)
     social_links = models.JSONField(default=dict, blank=True)
     skills = models.JSONField(default=list, blank=True)  # Using JSONField for skills list
     location = models.CharField(max_length=255, blank=True)
@@ -135,6 +136,30 @@ class Analytics(models.Model):
     event_type = models.CharField(max_length=50, choices=EVENT_CHOICES)
     metadata = models.JSONField(default=dict, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Notification(models.Model):
+    TYPE_CHOICES = (
+        ('new_message', 'New Message'),
+        ('gig_application', 'Gig Application'),
+        ('application_accepted', 'Application Accepted'),
+        ('application_rejected', 'Application Rejected'),
+        ('profile_view', 'Profile View'),
+    )
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='notifications')
+    notification_type = models.CharField(max_length=50, choices=TYPE_CHOICES)
+    title = models.CharField(max_length=255)
+    message = models.TextField(blank=True)
+    link = models.CharField(max_length=500, blank=True)
+    read = models.BooleanField(default=False)
+    metadata = models.JSONField(default=dict, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.notification_type} for {self.profile.user.username}"
 
 
 class Subscription(models.Model):

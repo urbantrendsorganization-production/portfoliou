@@ -74,15 +74,25 @@ export default function PublicPortfolioPage() {
       <ViewTracker profileId={profile.id} />
       
       {/* Cover Header */}
-      <div className="h-64 sm:h-80 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 relative">
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
+      <div className="h-64 sm:h-80 relative overflow-hidden">
+        {profile.cover_image_url ? (
+          <img
+            src={profile.cover_image_url}
+            alt="Cover"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500">
+            <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
+          </div>
+        )}
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative -mt-24 sm:-mt-32 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
             <Avatar
-              src={profile.avatar}
+              src={profile.avatar_url || profile.avatar}
               name={profile.name}
               size="xl"
               className="h-40 w-40 sm:h-48 sm:w-48 border-8 border-white shadow-2xl"

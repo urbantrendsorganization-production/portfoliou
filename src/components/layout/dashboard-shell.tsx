@@ -4,6 +4,24 @@ import { cn } from "@/utils/helpers";
 import { useAppStore } from "@/lib/store";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+
+function UnreadBadge() {
+  const count = useAppStore((s) => s.unreadMessageCount);
+  if (count === 0) return null;
+  return (
+    <span className="h-5 min-w-[20px] flex items-center justify-center bg-indigo-600 text-white text-[10px] font-bold rounded-full px-1.5">
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
+function UnreadBadgeDot() {
+  const count = useAppStore((s) => s.unreadMessageCount);
+  if (count === 0) return null;
+  return (
+    <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-indigo-600 rounded-full ring-2 ring-white" />
+  );
+}
 import {
   LayoutDashboard,
   Palette,
@@ -88,19 +106,26 @@ export function DashboardShell({ children }: DashboardShellProps) {
           <nav className="space-y-1 px-2">
             {navItems.map((item) => {
               const isActive = pathname === item.href;
+              const isMessages = item.href === "/messages";
               return (
                 <Link
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors relative",
                     isActive
                       ? "bg-indigo-50 text-indigo-700"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   )}
                 >
                   <item.icon className="h-5 w-5 flex-shrink-0" />
-                  {!collapsed && <span>{item.label}</span>}
+                  {!collapsed && (
+                    <span className="flex-1 flex items-center justify-between">
+                      {item.label}
+                      {isMessages && <UnreadBadge />}
+                    </span>
+                  )}
+                  {collapsed && isMessages && <UnreadBadgeDot />}
                 </Link>
               );
             })}

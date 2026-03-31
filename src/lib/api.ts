@@ -118,6 +118,12 @@ export const api = {
     update: (id: number, body: any, isFormData = false) =>
       apiRequest(`profiles/${id}/`, { method: 'PATCH', body, isFormData }),
     me: () => apiRequest('profiles/me/'),
+    search: async (q: string) => {
+      const data = await apiRequest(`profiles/search/?q=${encodeURIComponent(q)}`);
+      return extractResults(data);
+    },
+    changePassword: (body: { current_password: string; new_password: string }) =>
+      apiRequest('profiles/change_password/', { method: 'POST', body }),
   },
 
   // ── Work Samples ──────────────────────────
@@ -178,6 +184,22 @@ export const api = {
       apiRequest('messages/', { method: 'POST', body }),
     markRead: (id: number) =>
       apiRequest(`messages/${id}/mark_read/`, { method: 'PATCH' }),
+    markReadBulk: (partnerId: number) =>
+      apiRequest('messages/mark_read_bulk/', { method: 'POST', body: { partner_id: partnerId } }),
+    unreadCount: () =>
+      apiRequest('messages/unread_count/'),
+  },
+
+  // ── Notifications ─────────────────────────
+  notifications: {
+    list: async () => {
+      const data = await apiRequest('notifications/');
+      return extractResults(data);
+    },
+    unreadCount: () => apiRequest('notifications/unread_count/'),
+    markAllRead: () => apiRequest('notifications/mark_all_read/', { method: 'POST' }),
+    markRead: (id: number) =>
+      apiRequest(`notifications/${id}/`, { method: 'PATCH', body: { read: true } }),
   },
 
   // ── Analytics ─────────────────────────────

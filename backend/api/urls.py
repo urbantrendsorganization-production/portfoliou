@@ -4,7 +4,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views import (
     RegisterView, ProfileViewSet, WorkSampleViewSet,
     GigViewSet, GigApplicationViewSet, MessageViewSet,
-    AnalyticsViewSet, BookmarkViewSet, SubscriptionViewSet
+    AnalyticsViewSet, BookmarkViewSet, SubscriptionViewSet,
+    NotificationViewSet
 )
 
 router = DefaultRouter()
@@ -16,6 +17,7 @@ router.register(r'messages', MessageViewSet)
 router.register(r'analytics', AnalyticsViewSet)
 router.register(r'bookmarks', BookmarkViewSet)
 router.register(r'subscriptions', SubscriptionViewSet)
+router.register(r'notifications', NotificationViewSet)
 
 urlpatterns = [
     path('auth/register/', RegisterView.as_view(), name='auth_register'),

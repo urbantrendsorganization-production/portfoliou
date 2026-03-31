@@ -6,14 +6,18 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">Pu</span>
-              </div>
-              <span className="font-bold text-xl text-white">
-                Portfolio<span className="text-indigo-400">U</span>
-              </span>
+            <Link href="/" className="inline-flex items-center gap-2 mb-6">
+            <div className="rounded-xl bg-gradient-to-br flex items-center justify-center">
+              <img
+                src="https://res.cloudinary.com/dvifkm1ex/image/upload/v1774943398/PortfolioU_1_bqx4cv.png"
+                alt="Logo"
+                className="w-10" // Adjust w-10 (2.5rem) to your preferred size
+              />
             </div>
+            {/* <span className="font-bold text-2xl text-gray-900">
+              Portfolio<span className="text-blue-600">U</span>
+            </span> */}
+          </Link>
             <p className="text-sm leading-relaxed">
               The talent marketplace for college creatives. Showcase your work.
               Get discovered. Get hired.

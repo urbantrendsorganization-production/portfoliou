@@ -45,6 +45,7 @@ export interface Profile {
   bio: string;
   avatar: string | null;
   avatar_url: string | null;
+  cover_image_url: string | null;
   social_links: SocialLinks;
   skills: string[];
   location: string;

@@ -16,8 +16,10 @@ import {
   Calendar,
   ChevronDown,
   ChevronUp,
+  Clock,
   DollarSign,
   ExternalLink,
+  FileText,
   MessageSquare,
   Plus,
   Search,
@@ -29,6 +31,19 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+
+type AppFilter = "all" | "pending" | "accepted" | "rejected";
+
+interface GigApplication {
+  id: number;
+  gig: number;
+  gig_title: string;
+  student_profile: number;
+  student_name: string;
+  message: string;
+  status: "pending" | "accepted" | "rejected";
+  created_at: string;
+}
 
 export default function GigsPage() {
   const profile = useAppStore((s) => s.profile);
@@ -43,6 +58,10 @@ export default function GigsPage() {
   const [applications, setApplications] = useState<Record<number, any[]>>({});
   const [loadingApps, setLoadingApps] = useState<number | null>(null);
 
+  // Student "My Applications" state
+  const [myApplications, setMyApplications] = useState<GigApplication[]>([]);
+  const [appFilter, setAppFilter] = useState<AppFilter>("all");
+
   const [newGig, setNewGig] = useState({
     title: "",
     description: "",
@@ -52,12 +71,14 @@ export default function GigsPage() {
   });
 
   const isClient = profile?.role === "client";
+  const isStudent = profile?.role === "student";
 
   useEffect(() => {
     loadGigs();
     if (profile && profile.role === "student") {
-      api.gigApplications.list().then((apps) => {
-        setAppliedGigs(new Set(apps.map((a: any) => a.gig)));
+      api.gigApplications.list().then((apps: GigApplication[]) => {
+        setAppliedGigs(new Set(apps.map((a) => a.gig)));
+        setMyApplications(apps);
       }).catch(() => {});
     }
   }, [profile]);
@@ -139,7 +160,7 @@ export default function GigsPage() {
   async function handleApply(gigId: number) {
     if (!profile) return;
     try {
-      await api.gigApplications.create({
+      const newApp = await api.gigApplications.create({
         gig: gigId,
         student_profile: profile.id,
         message: applicationMessage,
@@ -159,6 +180,10 @@ export default function GigsPage() {
       }
 
       setAppliedGigs(new Set([...appliedGigs, gigId]));
+      // Add to myApplications so it appears immediately
+      if (newApp && newApp.id) {
+        setMyApplications((prev) => [newApp, ...prev]);
+      }
       setApplyingTo(null);
       setApplicationMessage("");
       alert("Application sent successfully!");
@@ -167,6 +192,51 @@ export default function GigsPage() {
       alert(msg);
     }
   }
+
+  const filteredApplications = myApplications.filter((app) => {
+    if (appFilter === "all") return true;
+    return app.status === appFilter;
+  });
+
+  const statusCounts = {
+    all: myApplications.length,
+    pending: myApplications.filter((a) => a.status === "pending").length,
+    accepted: myApplications.filter((a) => a.status === "accepted").length,
+    rejected: myApplications.filter((a) => a.status === "rejected").length,
+  };
+
+  function getStatusBadge(status: GigApplication["status"]) {
+    switch (status) {
+      case "pending":
+        return (
+          <Badge variant="secondary" className="bg-yellow-50 text-yellow-700 border-yellow-200 text-xs">
+            <Clock className="h-3 w-3 mr-1" />
+            Pending
+          </Badge>
+        );
+      case "accepted":
+        return (
+          <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200 text-xs">
+            <CheckCircle className="h-3 w-3 mr-1" />
+            Accepted
+          </Badge>
+        );
+      case "rejected":
+        return (
+          <Badge variant="secondary" className="bg-red-50 text-red-700 border-red-200 text-xs">
+            <XCircle className="h-3 w-3 mr-1" />
+            Declined
+          </Badge>
+        );
+    }
+  }
+
+  const filterButtons: { key: AppFilter; label: string }[] = [
+    { key: "all", label: "All" },
+    { key: "pending", label: "Pending" },
+    { key: "accepted", label: "Accepted" },
+    { key: "rejected", label: "Declined" },
+  ];
 
   return (
     <DashboardShell>
@@ -361,6 +431,88 @@ export default function GigsPage() {
         {isClient && myGigs.length > 0 && gigs.length > 0 && (
           <div className="border-t border-gray-200 pt-4">
             <h2 className="text-lg font-bold text-gray-900">Other Open Gigs</h2>
+          </div>
+        )}
+
+        {/* Student: My Applications */}
+        {isStudent && myApplications.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <FileText className="h-5 w-5 text-indigo-600" /> My Applications
+            </h2>
+
+            {/* Filter Tabs */}
+            <div className="flex flex-wrap gap-2">
+              {filterButtons.map(({ key, label }) => (
+                <button
+                  key={key}
+                  onClick={() => setAppFilter(key)}
+                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    appFilter === key
+                      ? "bg-indigo-600 text-white"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  }`}
+                >
+                  {label}
+                  {statusCounts[key] > 0 && (
+                    <span
+                      className={`ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        appFilter === key
+                          ? "bg-white/20 text-white"
+                          : "bg-gray-200 text-gray-700"
+                      }`}
+                    >
+                      {statusCounts[key]}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Application Cards */}
+            {filteredApplications.length === 0 ? (
+              <Card className="p-8 text-center">
+                <FileText className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">
+                  No {appFilter === "all" ? "" : appFilter} applications found.
+                </p>
+              </Card>
+            ) : (
+              <div className="grid gap-3">
+                {filteredApplications.map((app) => (
+                  <Card key={app.id} className="p-5 hover:border-indigo-200 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="space-y-2 flex-1 min-w-0">
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <h3 className="font-semibold text-gray-900 truncate">
+                            {app.gig_title}
+                          </h3>
+                          {getStatusBadge(app.status)}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3.5 w-3.5" />
+                            Applied {new Date(app.created_at).toLocaleDateString()}
+                          </span>
+                        </div>
+                        {app.message && (
+                          <p className="text-sm text-gray-600 line-clamp-2 italic">
+                            &ldquo;{app.message}&rdquo;
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Divider before open gigs */}
+            {gigs.length > 0 && (
+              <div className="border-t border-gray-200 pt-4">
+                <h2 className="text-lg font-bold text-gray-900">Open Gigs</h2>
+              </div>
+            )}
           </div>
         )}
 

@@ -95,33 +95,6 @@ const features = [
   },
 ];
 
-const testimonials = [
-  {
-    name: "Aisha M.",
-    role: "Cosmetology Student",
-    school: "Howard University",
-    quote:
-      "PortfolioU helped me land 3 bridal makeup gigs in my first month. The portfolio page is gorgeous and my clients love it.",
-    avatar: "AM",
-  },
-  {
-    name: "Marcus T.",
-    role: "Web Developer",
-    school: "Morehouse College",
-    quote:
-      "I went from zero freelance work to being booked solid. The gig board is a game-changer for student developers.",
-    avatar: "MT",
-  },
-  {
-    name: "Luna K.",
-    role: "Graphic Designer",
-    school: "SCAD",
-    quote:
-      "Finally a platform that actually understands student creatives. My portfolio looks more professional than sites I paid hundreds for.",
-    avatar: "LK",
-  },
-];
-
 const stats = [
   { value: "10,000+", label: "Student Portfolios" },
   { value: "2,500+", label: "Gigs Posted" },
@@ -139,25 +112,30 @@ export default function LandingPage() {
 
   return (
     <main className="overflow-hidden">
-      {/* Hero */}
-      <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-indigo-950 to-purple-950">
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-float" />
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-float animation-delay-200" />
-          <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl animate-float animation-delay-400" />
-          <div
-            className="absolute inset-0 opacity-[0.03]"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)",
-              backgroundSize: "60px 60px",
-            }}
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* BACKGROUND IMAGE LAYER */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="https://res.cloudinary.com/dvifkm1ex/image/upload/v1774940835/PortfolioU_apih3l.png" 
+            alt="PortfolioU Background" 
+            className="w-full h-full object-cover scale-105" 
           />
+          {/* OVERLAY: Darkens the image so text is readable and blends the bottom into the next section */}
+          <div className="absolute inset-0 bg-slate-950/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/20 to-white" />
         </div>
 
+        {/* Decorative Blur Orbs */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl animate-float" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-float animation-delay-200" />
+        </div>
+
+        {/* Hero Content */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 text-center">
           <div className="animate-fade-in">
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-2 text-sm text-indigo-200 backdrop-blur-sm mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/20 px-4 py-2 text-sm text-indigo-100 backdrop-blur-md mb-8">
               <Sparkles className="h-4 w-4" />
               The Talent Marketplace for College Creatives
             </div>
@@ -166,14 +144,14 @@ export default function LandingPage() {
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight mb-6 animate-slide-up">
             Your Work Deserves
             <br />
-            <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">
               To Be Seen
             </span>
           </h1>
 
-          <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto mb-10 animate-slide-up animation-delay-200">
+          <p className="text-lg sm:text-xl text-gray-200 max-w-2xl mx-auto mb-10 animate-slide-up animation-delay-200 drop-shadow-md">
             Build a stunning portfolio, get discovered by top brands, and land
-            paid gigs -- all while still in school. Made for students in beauty,
+            paid gigs — all while still in school. Made for students in beauty,
             web dev, graphic design, and fashion.
           </p>
 
@@ -212,19 +190,18 @@ export default function LandingPage() {
           <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 animate-fade-in animation-delay-600">
             {stats.map((stat) => (
               <div key={stat.label} className="text-center">
-                <div className="text-3xl sm:text-4xl font-bold text-white mb-1">
+                <div className="text-3xl sm:text-4xl font-bold text-white mb-1 drop-shadow-sm">
                   {stat.value}
                 </div>
-                <div className="text-sm text-gray-400">{stat.label}</div>
+                <div className="text-sm text-gray-300 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent" />
       </section>
 
       {/* Disciplines Section */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-white relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
@@ -232,19 +209,19 @@ export default function LandingPage() {
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Whether you style hair, write code, design brands, or create
-              fashion -- PortfolioU is your platform.
+              fashion — PortfolioU is your platform.
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {disciplines.map((d) => (
               <div
                 key={d.name}
-                className="group relative overflow-hidden rounded-2xl bg-gray-900 aspect-[4/5] cursor-pointer"
+                className="group relative overflow-hidden rounded-2xl bg-gray-900 aspect-[4/5] cursor-pointer shadow-xl"
               >
                 <img
                   src={d.image}
                   alt={d.name}
-                  className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-105 transition-all duration-500"
+                  className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-40 group-hover:scale-110 transition-all duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-gray-950/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">

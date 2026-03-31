@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile, WorkSample, Gig, GigApplication, Message, Bookmark, Analytics, Subscription
+from .models import Profile, WorkSample, Gig, GigApplication, Message, Bookmark, Analytics, Notification, Subscription
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,6 +25,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     user_username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
     avatar_url = serializers.SerializerMethodField()
+    cover_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
@@ -36,6 +37,14 @@ class ProfileSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.avatar.url)
             return obj.avatar.url
+        return None
+
+    def get_cover_image_url(self, obj):
+        if obj.cover_image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.cover_image.url)
+            return obj.cover_image.url
         return None
 
 class WorkSampleSerializer(serializers.ModelSerializer):
@@ -89,6 +98,7 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         fields = '__all__'
+        extra_kwargs = {'sender': {'read_only': True}}
 
 class BookmarkSerializer(serializers.ModelSerializer):
     class Meta:
@@ -98,6 +108,11 @@ class BookmarkSerializer(serializers.ModelSerializer):
 class AnalyticsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Analytics
+        fields = '__all__'
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
         fields = '__all__'
 
 class SubscriptionSerializer(serializers.ModelSerializer):

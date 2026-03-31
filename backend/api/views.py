@@ -3,12 +3,12 @@ from rest_framework import viewsets, permissions, status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from django.contrib.auth.models import User
-from .models import Profile, WorkSample, Gig, GigApplication, Message, Bookmark, Analytics, Subscription
+from .models import Profile, WorkSample, Gig, GigApplication, Message, Bookmark, Analytics, Notification, Subscription
 from .serializers import (
     UserSerializer, RegisterSerializer, ProfileSerializer,
     WorkSampleSerializer, GigSerializer, GigApplicationSerializer,
     MessageSerializer, BookmarkSerializer, AnalyticsSerializer,
-    SubscriptionSerializer
+    NotificationSerializer, SubscriptionSerializer
 )
 from django.db.models import Count, Q
 
@@ -46,6 +46,34 @@ class ProfileViewSet(viewsets.ModelViewSet):
         profile = request.user.profile
         serializer = self.get_serializer(profile)
         return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def search(self, request):
+        """Search profiles by name for starting new conversations."""
+        q = request.query_params.get('q', '').strip()
+        if len(q) < 2:
+            return Response([])
+        profiles = Profile.objects.filter(
+            models.Q(name__icontains=q) | models.Q(username__icontains=q)
+        ).exclude(user=request.user)[:20]
+        serializer = self.get_serializer(profiles, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def change_password(self, request):
+        """Change user password."""
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
+        if not current_password or not new_password:
+            return Response({'error': 'Both current and new password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        if not user.check_password(current_password):
+            return Response({'error': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+        if len(new_password) < 8:
+            return Response({'error': 'New password must be at least 8 characters.'}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        return Response({'status': 'Password changed successfully.'})
 
 class WorkSampleViewSet(viewsets.ModelViewSet):
     queryset = WorkSample.objects.all()
@@ -86,6 +114,9 @@ class GigApplicationViewSet(viewsets.ModelViewSet):
         gig_id = self.request.query_params.get('gig_id')
         if gig_id:
             qs = qs.filter(gig_id=gig_id)
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            qs = qs.filter(status=status_filter)
         return qs
 
 class MessageViewSet(viewsets.ModelViewSet):
@@ -118,6 +149,47 @@ class MessageViewSet(viewsets.ModelViewSet):
             message.read = True
             message.save()
         return Response({'status': 'ok'})
+
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def mark_read_bulk(self, request):
+        """Mark all messages from a partner as read."""
+        partner_id = request.data.get('partner_id')
+        if partner_id:
+            count = Message.objects.filter(
+                sender_id=partner_id,
+                receiver=request.user.profile,
+                read=False,
+            ).update(read=True)
+            return Response({'marked': count})
+        return Response({'marked': 0})
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def unread_count(self, request):
+        """Get total unread message count."""
+        count = Message.objects.filter(
+            receiver=request.user.profile,
+            read=False,
+        ).count()
+        return Response({'count': count})
+
+class NotificationViewSet(viewsets.ModelViewSet):
+    queryset = Notification.objects.all()
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(profile__user=self.request.user)
+
+    @action(detail=False, methods=['get'])
+    def unread_count(self, request):
+        count = self.get_queryset().filter(read=False).count()
+        return Response({'count': count})
+
+    @action(detail=False, methods=['post'])
+    def mark_all_read(self, request):
+        updated = self.get_queryset().filter(read=False).update(read=True)
+        return Response({'marked': updated})
+
 
 class BookmarkViewSet(viewsets.ModelViewSet):
     queryset = Bookmark.objects.all()

@@ -15,10 +15,21 @@ import {
   LogOut,
   Briefcase,
   Search,
+  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+
+function NavUnreadBadge() {
+  const count = useAppStore((s) => s.unreadMessageCount);
+  if (count === 0) return null;
+  return (
+    <span className="h-5 min-w-[20px] flex items-center justify-center bg-indigo-600 text-white text-[10px] font-bold rounded-full px-1.5">
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -147,6 +158,15 @@ export function Navbar() {
                 <User className="h-4 w-4" /> My Portfolio
               </Link>
               <Link
+                href="/messages"
+                className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+              >
+                <span className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" /> Messages
+                </span>
+                <NavUnreadBadge />
+              </Link>
+              <Link
                 href="/settings"
                 className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
               >
@@ -209,18 +229,12 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">Pu</span>
-            </div>
-            <span
-              className={cn(
-                "font-bold text-xl transition-colors",
-                scrolled || !isLanding ? "text-gray-900" : "text-white"
-              )}
-            >
-              Portfolio<span className="text-indigo-500">U</span>
-            </span>
-          </Link>
+  <img 
+    src="https://res.cloudinary.com/dvifkm1ex/image/upload/v1774940835/PortfolioU_apih3l.png" 
+    alt="Logo" 
+    className="w-38 h-auto" // Adjust w-10 (2.5rem) to your preferred size
+  />
+</Link>
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">

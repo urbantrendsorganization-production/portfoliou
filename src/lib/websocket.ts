@@ -1,4 +1,15 @@
-const WS_BASE = process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000";
+function getWsBase(): string {
+  const envUrl = process.env.NEXT_PUBLIC_WS_URL;
+  if (envUrl) return envUrl;
+
+  // Auto-detect from browser location
+  if (typeof window !== "undefined") {
+    const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${proto}//${window.location.host}`;
+  }
+
+  return "ws://localhost:8000";
+}
 
 type WSMessage = {
   type: string;
@@ -27,7 +38,7 @@ class WebSocketClient {
     if (this.ws?.readyState === WebSocket.OPEN) return;
 
     try {
-      this.ws = new WebSocket(`${WS_BASE}/ws/chat/?token=${this.token}`);
+      this.ws = new WebSocket(`${getWsBase()}/ws/chat/?token=${this.token}`);
 
       this.ws.onopen = () => {
         this.reconnectAttempts = 0;

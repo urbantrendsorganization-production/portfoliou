@@ -5,7 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Install system deps for psycopg and Pillow
+# Install system deps for psycopg2 and Pillow
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         libpq-dev gcc libjpeg62-turbo-dev zlib1g-dev && \
@@ -23,7 +23,6 @@ RUN SECRET_KEY=build-placeholder \
 
 EXPOSE 8000
 
-# Entrypoint handles migrations + server start
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

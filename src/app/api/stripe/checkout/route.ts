@@ -2,7 +2,8 @@ import { stripe } from "@/lib/stripe/server";
 import { NextResponse } from "next/server";
 import { PLANS } from "@/utils/constants";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+// Server-side calls use internal Docker URL; falls back to public URL or localhost
+const API_URL = process.env.BACKEND_INTERNAL_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 export async function POST(req: Request) {
   try {

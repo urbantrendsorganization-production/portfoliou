@@ -101,9 +101,23 @@ class MessageSerializer(serializers.ModelSerializer):
         extra_kwargs = {'sender': {'read_only': True}}
 
 class BookmarkSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student_profile.name', read_only=True)
+    student_username = serializers.CharField(source='student_profile.username', read_only=True)
+    student_discipline = serializers.CharField(source='student_profile.discipline', read_only=True)
+    student_avatar = serializers.SerializerMethodField()
+
     class Meta:
         model = Bookmark
         fields = '__all__'
+        extra_kwargs = {'client_profile': {'read_only': True}}
+
+    def get_student_avatar(self, obj):
+        if obj.student_profile.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.student_profile.avatar.url)
+            return obj.student_profile.avatar.url
+        return None
 
 class AnalyticsSerializer(serializers.ModelSerializer):
     class Meta:

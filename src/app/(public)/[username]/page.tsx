@@ -14,8 +14,9 @@ import {
   Sparkles,
   AtSign,
   Link2,
+  Briefcase,
 } from "lucide-react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PDFExportButton } from "./pdf-export-button";
 import { ShareProfileButton } from "./share-button";
@@ -23,6 +24,7 @@ import { ViewTracker } from "./view-tracker";
 
 export default function PublicPortfolioPage() {
   const { username } = useParams();
+  const router = useRouter();
   const [profile, setProfile] = useState<any>(null);
   const [samples, setSamples] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,9 +104,16 @@ export default function PublicPortfolioPage() {
                 {profile.name}
                 {profile.is_premium && <Sparkles className="h-6 w-6 text-amber-500" />}
               </h1>
-              <p className="text-lg font-semibold text-indigo-600 mt-1">
-                {profile.discipline}
-              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-lg font-semibold text-indigo-600">
+                  {profile.discipline}
+                </p>
+                {profile.open_to_work && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-bold rounded-full">
+                    <Briefcase className="h-3 w-3" /> Open to Work
+                  </span>
+                )}
+              </div>
               <div className="flex flex-wrap justify-center sm:justify-start items-center gap-4 mt-3 text-gray-500">
                 <span className="flex items-center gap-1 text-sm">
                   <MapPin className="h-4 w-4" /> {profile.location || "Earth"}
@@ -119,7 +128,17 @@ export default function PublicPortfolioPage() {
           <div className="flex flex-wrap justify-center items-center gap-3 pb-4">
             <ShareProfileButton />
             <PDFExportButton profile={profile} samples={samples} />
-            <Button className="shadow-lg shadow-indigo-200">
+            <Button
+              className="shadow-lg shadow-indigo-200"
+              onClick={() => {
+                const token = localStorage.getItem("access_token");
+                if (token) {
+                  router.push(`/messages?partner=${profile.id}`);
+                } else {
+                  router.push(`/login?redirect=/${username}&action=hire`);
+                }
+              }}
+            >
               <Mail className="h-4 w-4" /> Hire Me
             </Button>
           </div>

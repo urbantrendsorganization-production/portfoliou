@@ -10,6 +10,7 @@ import { DISCIPLINES } from "@/utils/constants";
 import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { Avatar } from "@/components/ui/avatar";
+import { Modal } from "@/components/ui/modal";
 import {
   Camera,
   Save,
@@ -23,6 +24,7 @@ import {
   AlertTriangle,
   Sparkles,
   ImagePlus,
+  Briefcase,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -141,6 +143,16 @@ export default function SettingsPage() {
   );
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  // Delete account state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Premium upgrade state
+  const [upgradeLoading, setUpgradeLoading] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   // Notification prefs state
   const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(
@@ -261,6 +273,91 @@ export default function SettingsPage() {
       setPasswordErrors({ current_password: message });
     } finally {
       setPasswordLoading(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    if (!deletePassword) {
+      setDeleteError("Password is required");
+      return;
+    }
+    setDeleteLoading(true);
+    setDeleteError("");
+    try {
+      await api.profiles.deleteAccount({ password: deletePassword });
+      api.auth.logout();
+      window.location.href = "/";
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error
+          ? err.message
+          : (err as { error?: string })?.error || "Failed to delete account";
+      setDeleteError(message);
+    } finally {
+      setDeleteLoading(false);
+    }
+  }
+
+  async function handleUpgradePremium() {
+    setUpgradeLoading(true);
+    try {
+      const token = localStorage.getItem("access_token");
+      const plan =
+        profile?.role === "client" ? "client_premium" : "student_premium";
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ plan }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("Stripe checkout error:", data.error);
+      }
+    } catch (err) {
+      console.error("Error starting checkout:", err);
+    } finally {
+      setUpgradeLoading(false);
+    }
+  }
+
+  async function handleManageSubscription() {
+    setPortalLoading(true);
+    try {
+      const token = localStorage.getItem("access_token");
+      const res = await fetch("/api/stripe/portal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        console.error("Stripe portal error:", data.error);
+      }
+    } catch (err) {
+      console.error("Error opening portal:", err);
+    } finally {
+      setPortalLoading(false);
+    }
+  }
+
+  async function handleToggleOpenToWork() {
+    if (!profile) return;
+    try {
+      const updatedProfile = await api.profiles.update(profile.id, {
+        open_to_work: !profile.open_to_work,
+      });
+      setProfile(updatedProfile);
+    } catch (err) {
+      console.error("Error toggling open to work:", err);
     }
   }
 
@@ -441,6 +538,23 @@ export default function SettingsPage() {
                       placeholder="e.g., New York, NY"
                     />
 
+                    {profile.role === "student" && (
+                      <div className="rounded-lg border border-gray-200 p-4">
+                        <ToggleSwitch
+                          checked={profile.open_to_work}
+                          onChange={handleToggleOpenToWork}
+                          label="Open to Work"
+                          description="Let clients know you're available for gigs and freelance work"
+                        />
+                        {profile.open_to_work && (
+                          <p className="mt-2 text-xs text-green-600 flex items-center gap-1">
+                            <Briefcase className="h-3 w-3" /> Your profile will
+                            show an &quot;Open to Work&quot; badge
+                          </p>
+                        )}
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                       <div className="flex items-center gap-2">
                         {success && (
@@ -566,15 +680,65 @@ export default function SettingsPage() {
                         permanently removed.
                       </p>
                       <Button
-                        variant="outline"
-                        disabled
-                        className="border-red-300 text-red-400 cursor-not-allowed"
+                        variant="danger"
+                        onClick={() => setShowDeleteModal(true)}
                       >
-                        Contact support to delete your account
+                        <AlertTriangle className="h-4 w-4" /> Delete My Account
                       </Button>
                     </div>
                   </div>
                 </Card>
+
+                {/* Delete Account Modal */}
+                <Modal
+                  isOpen={showDeleteModal}
+                  onClose={() => {
+                    setShowDeleteModal(false);
+                    setDeletePassword("");
+                    setDeleteError("");
+                  }}
+                  title="Delete Account"
+                  size="sm"
+                >
+                  <div className="space-y-4">
+                    <div className="p-3 bg-red-50 rounded-lg border border-red-100">
+                      <p className="text-sm text-red-800">
+                        This action is <strong>permanent</strong>. All your
+                        portfolio items, messages, and profile data will be
+                        deleted forever.
+                      </p>
+                    </div>
+                    <Input
+                      label="Enter your password to confirm"
+                      type="password"
+                      value={deletePassword}
+                      onChange={(e) => setDeletePassword(e.target.value)}
+                      error={deleteError}
+                      autoComplete="current-password"
+                    />
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setShowDeleteModal(false);
+                          setDeletePassword("");
+                          setDeleteError("");
+                        }}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="danger"
+                        onClick={handleDeleteAccount}
+                        loading={deleteLoading}
+                        className="flex-1"
+                      >
+                        Delete Forever
+                      </Button>
+                    </div>
+                  </div>
+                </Modal>
               </>
             )}
 
@@ -611,11 +775,8 @@ export default function SettingsPage() {
                       </p>
                       <Button
                         variant="outline"
-                        onClick={() =>
-                          alert(
-                            "Subscription management is coming soon. Please contact support for any billing changes."
-                          )
-                        }
+                        onClick={handleManageSubscription}
+                        loading={portalLoading}
                       >
                         <CreditCard className="h-4 w-4" /> Manage Subscription
                       </Button>
@@ -624,7 +785,10 @@ export default function SettingsPage() {
                     <div className="space-y-6">
                       <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 p-6">
                         <h4 className="font-semibold text-gray-900 mb-3">
-                          Upgrade to Premium
+                          Upgrade to Premium &mdash;{" "}
+                          <span className="text-indigo-600">
+                            ${profile.role === "client" ? "35" : "8"}/mo
+                          </span>
                         </h4>
                         <p className="text-sm text-gray-600 mb-4">
                           Unlock powerful features to boost your visibility and
@@ -642,11 +806,8 @@ export default function SettingsPage() {
                           ))}
                         </ul>
                         <Button
-                          onClick={() =>
-                            alert(
-                              "Premium upgrades are coming soon! Stay tuned."
-                            )
-                          }
+                          onClick={handleUpgradePremium}
+                          loading={upgradeLoading}
                           className="px-6"
                         >
                           <Sparkles className="h-4 w-4" /> Upgrade to Premium

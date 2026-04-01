@@ -75,6 +75,18 @@ class ProfileViewSet(viewsets.ModelViewSet):
         user.save()
         return Response({'status': 'Password changed successfully.'})
 
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def delete_account(self, request):
+        """Permanently delete user account and all associated data."""
+        password = request.data.get('password')
+        if not password:
+            return Response({'error': 'Password is required to delete your account.'}, status=status.HTTP_400_BAD_REQUEST)
+        user = request.user
+        if not user.check_password(password):
+            return Response({'error': 'Incorrect password.'}, status=status.HTTP_400_BAD_REQUEST)
+        user.delete()
+        return Response({'status': 'Account deleted successfully.'}, status=status.HTTP_200_OK)
+
 class WorkSampleViewSet(viewsets.ModelViewSet):
     queryset = WorkSample.objects.all()
     serializer_class = WorkSampleSerializer
@@ -199,8 +211,26 @@ class BookmarkViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return self.queryset.filter(client_profile__user=self.request.user)
 
-    def perform_create(self, serializer):
-        serializer.save(client_profile=self.request.user.profile)
+    def create(self, request, *args, **kwargs):
+        student_profile_id = request.data.get('student_profile')
+        if not student_profile_id:
+            return Response({'error': 'student_profile is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        client_profile = request.user.profile
+
+        # Return existing bookmark if already bookmarked (idempotent)
+        existing = Bookmark.objects.filter(
+            client_profile=client_profile,
+            student_profile_id=student_profile_id,
+        ).first()
+        if existing:
+            serializer = self.get_serializer(existing)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(client_profile=client_profile)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class SubscriptionViewSet(viewsets.ModelViewSet):
@@ -210,6 +240,17 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return self.queryset.filter(profile__user=self.request.user)
+
+    def get_permissions(self):
+        # Allow internal webhook calls to create subscriptions
+        if self.action == 'create':
+            internal_key = self.request.headers.get('X-Internal-Key', '')
+            if internal_key and internal_key == getattr(
+                __import__('django.conf', fromlist=['settings']).settings,
+                'INTERNAL_API_KEY', ''
+            ):
+                return [permissions.AllowAny()]
+        return super().get_permissions()
 
 
 class AnalyticsViewSet(viewsets.ModelViewSet):

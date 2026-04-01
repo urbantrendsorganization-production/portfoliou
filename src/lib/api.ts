@@ -124,6 +124,8 @@ export const api = {
     },
     changePassword: (body: { current_password: string; new_password: string }) =>
       apiRequest('profiles/change_password/', { method: 'POST', body }),
+    deleteAccount: (body: { password: string }) =>
+      apiRequest('profiles/delete_account/', { method: 'POST', body }),
   },
 
   // ── Work Samples ──────────────────────────

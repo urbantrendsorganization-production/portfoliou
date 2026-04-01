@@ -14,10 +14,28 @@ import {
   Check,
   Copy,
   ExternalLink,
+  MessageSquare,
+  Bell,
+  UserCheck,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+
+function getTimeAgo(dateString: string): string {
+  const now = Date.now();
+  const then = new Date(dateString).getTime();
+  const seconds = Math.floor((now - then) / 1000);
+  if (seconds < 60) return "just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 
 export default function DashboardPage() {
   const profile = useAppStore((s) => s.profile);
@@ -29,16 +47,18 @@ export default function DashboardPage() {
     activeGigs: 0,
   });
   const [copied, setCopied] = useState(false);
+  const [recentActivity, setRecentActivity] = useState<any[]>([]);
 
   useEffect(() => {
     if (!profile) return;
 
     async function loadStats() {
       try {
-        const [analytics, workSamples, gigs] = await Promise.all([
+        const [analytics, workSamples, gigs, notifications] = await Promise.all([
           api.analytics.list(),
           api.workSamples.list(profile!.id),
           api.gigs.list({ status: 'open' }),
+          api.notifications.list(),
         ]);
 
         setStats({
@@ -48,6 +68,8 @@ export default function DashboardPage() {
           totalSamples: workSamples.length,
           activeGigs: gigs.length,
         });
+
+        setRecentActivity(notifications.slice(0, 5));
       } catch (err) {
         console.error("Error loading dashboard stats:", err);
       }
@@ -250,30 +272,41 @@ export default function DashboardPage() {
               Recent Activity
             </h2>
             <div className="space-y-4">
-              <div className="flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0">
-                <div className="h-8 w-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0">
-                  <Eye className="h-4 w-4" />
+              {recentActivity.length === 0 ? (
+                <div className="text-center py-8">
+                  <Bell className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400">No recent activity yet</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    New profile view
-                  </p>
-                  <p className="text-xs text-gray-500">Someone from Atlanta viewed your portfolio</p>
-                </div>
-                <span className="ml-auto text-xs text-gray-400">2h ago</span>
-              </div>
-              <div className="flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0">
-                <div className="h-8 w-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center flex-shrink-0">
-                  <Check className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-900">
-                    Profile updated
-                  </p>
-                  <p className="text-xs text-gray-500">You updated your discipline to Graphic Design</p>
-                </div>
-                <span className="ml-auto text-xs text-gray-400">5h ago</span>
-              </div>
+              ) : (
+                recentActivity.map((item: any) => {
+                  const iconMap: Record<string, { icon: React.ReactNode; bg: string }> = {
+                    new_message: { icon: <MessageSquare className="h-4 w-4" />, bg: "bg-blue-50 text-blue-600" },
+                    gig_application: { icon: <Briefcase className="h-4 w-4" />, bg: "bg-purple-50 text-purple-600" },
+                    application_accepted: { icon: <UserCheck className="h-4 w-4" />, bg: "bg-green-50 text-green-600" },
+                    application_rejected: { icon: <XCircle className="h-4 w-4" />, bg: "bg-red-50 text-red-600" },
+                    profile_view: { icon: <Eye className="h-4 w-4" />, bg: "bg-indigo-50 text-indigo-600" },
+                  };
+                  const style = iconMap[item.notification_type] || iconMap.profile_view;
+                  const timeAgo = getTimeAgo(item.created_at);
+
+                  return (
+                    <div key={item.id} className="flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0">
+                      <div className={`h-8 w-8 rounded-lg ${style.bg} flex items-center justify-center flex-shrink-0`}>
+                        {style.icon}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {item.title}
+                        </p>
+                        {item.message && (
+                          <p className="text-xs text-gray-500 truncate">{item.message}</p>
+                        )}
+                      </div>
+                      <span className="ml-auto text-xs text-gray-400 flex-shrink-0">{timeAgo}</span>
+                    </div>
+                  );
+                })
+              )}
             </div>
           </Card>
         </div>

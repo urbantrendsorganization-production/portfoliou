@@ -9,7 +9,8 @@ import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { wsClient } from "@/lib/websocket";
 import { Search, Send, MoreVertical, Loader2, Plus, X, ArrowLeft } from "lucide-react";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { Suspense, useEffect, useRef, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 
 interface Conversation {
   id: number;
@@ -22,8 +23,24 @@ interface Conversation {
 }
 
 export default function MessagesPage() {
+  return (
+    <Suspense fallback={
+      <DashboardShell>
+        <div className="flex items-center justify-center h-[calc(100vh-12rem)]">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        </div>
+      </DashboardShell>
+    }>
+      <MessagesContent />
+    </Suspense>
+  );
+}
+
+function MessagesContent() {
   const profile = useAppStore((s) => s.profile);
   const setUnreadMessageCount = useAppStore((s) => s.setUnreadMessageCount);
+  const searchParams = useSearchParams();
+  const partnerParam = searchParams.get("partner");
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedUser, setSelectedUser] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<any[]>([]);
@@ -51,6 +68,25 @@ export default function MessagesPage() {
     if (!profile) return;
     loadConversations();
   }, [profile]);
+
+  // Auto-open conversation from ?partner= query param (e.g. from Hire Me button)
+  useEffect(() => {
+    if (!profile || !partnerParam) return;
+    const partnerId = Number(partnerParam);
+    if (!partnerId || partnerId === profile.id) return;
+
+    async function openPartner() {
+      try {
+        const partnerProfile = await api.profiles.get(partnerId);
+        if (partnerProfile) {
+          handleSelectNewChatProfile(partnerProfile);
+        }
+      } catch (err) {
+        console.error("Error opening partner chat:", err);
+      }
+    }
+    openPartner();
+  }, [profile, partnerParam]);
 
   // WebSocket: listen for real-time messages
   useEffect(() => {

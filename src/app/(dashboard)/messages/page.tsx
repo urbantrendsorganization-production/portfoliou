@@ -337,9 +337,9 @@ function MessagesContent() {
             showMobileChat ? "hidden md:flex" : "flex"
           }`}
         >
-          <div className="p-4 border-b border-gray-100">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="text-xl font-bold text-gray-900">Messages</h1>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Messages</h1>
               <Button
                 variant="ghost"
                 size="sm"
@@ -370,13 +370,13 @@ function MessagesContent() {
                     value={newChatQuery}
                     onChange={(e) => setNewChatQuery(e.target.value)}
                     autoFocus
-                    className="w-full pl-9 pr-4 py-2 bg-indigo-50 border border-indigo-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                    className="w-full pl-9 pr-4 py-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-lg text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   />
                 </div>
 
                 {/* Search Results Dropdown */}
                 {(searchResults.length > 0 || searchLoading) && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 max-h-60 overflow-y-auto">
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg dark:shadow-black/30 z-20 max-h-60 overflow-y-auto">
                     {searchLoading ? (
                       <div className="flex justify-center py-4">
                         <Loader2 className="h-5 w-5 animate-spin text-indigo-400" />
@@ -386,7 +386,7 @@ function MessagesContent() {
                         <button
                           key={p.id}
                           onClick={() => handleSelectNewChatProfile(p)}
-                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-left"
                         >
                           <Avatar
                             src={p.avatar_url || p.avatar}
@@ -394,10 +394,10 @@ function MessagesContent() {
                             size="sm"
                           />
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 truncate">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                               {p.name}
                             </p>
-                            <p className="text-xs text-gray-500 capitalize truncate">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 capitalize truncate">
                               {p.role}
                             </p>
                           </div>
@@ -408,8 +408,8 @@ function MessagesContent() {
                 )}
 
                 {newChatQuery.length >= 2 && !searchLoading && searchResults.length === 0 && (
-                  <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 p-4 text-center">
-                    <p className="text-sm text-gray-400">No users found</p>
+                  <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-20 p-4 text-center">
+                    <p className="text-sm text-gray-400 dark:text-gray-500">No users found</p>
                   </div>
                 )}
               </div>
@@ -422,7 +422,7 @@ function MessagesContent() {
                 placeholder="Search chats..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-gray-50 border-none rounded-lg text-sm focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-9 pr-4 py-2 bg-gray-50 dark:bg-gray-700 border-none rounded-lg text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -442,9 +442,9 @@ function MessagesContent() {
                 <button
                   key={conv.id}
                   onClick={() => selectConversation(conv)}
-                  className={`w-full p-4 flex gap-3 hover:bg-gray-50 transition-colors border-l-4 ${
+                  className={`w-full p-4 flex gap-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors border-l-4 ${
                     selectedUser?.id === conv.id
-                      ? "bg-indigo-50/50 border-indigo-600"
+                      ? "bg-indigo-50/50 dark:bg-indigo-950/30 border-indigo-600"
                       : "border-transparent"
                   }`}
                 >
@@ -453,7 +453,7 @@ function MessagesContent() {
                   </div>
                   <div className="flex-1 text-left min-w-0">
                     <div className="flex justify-between items-start mb-0.5">
-                      <p className={`truncate ${conv.unreadCount > 0 ? "font-extrabold text-gray-900" : "font-bold text-gray-900"}`}>
+                      <p className={`truncate ${conv.unreadCount > 0 ? "font-extrabold text-gray-900 dark:text-gray-100" : "font-bold text-gray-900 dark:text-gray-100"}`}>
                         {conv.name}
                       </p>
                       {conv.lastMessage && (
@@ -465,7 +465,7 @@ function MessagesContent() {
                     <div className="flex justify-between items-center">
                       {conv.lastMessage ? (
                         <>
-                          <p className={`text-xs truncate ${conv.unreadCount > 0 ? "text-gray-900 font-semibold" : "text-gray-500"}`}>
+                          <p className={`text-xs truncate ${conv.unreadCount > 0 ? "text-gray-900 dark:text-gray-100 font-semibold" : "text-gray-500 dark:text-gray-400"}`}>
                             {conv.lastMessage.sender === profile?.id && (
                               <span className="text-gray-400">You: </span>
                             )}
@@ -497,7 +497,7 @@ function MessagesContent() {
           {selectedUser ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+              <div className="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handleBackToList}
@@ -507,7 +507,7 @@ function MessagesContent() {
                   </button>
                   <Avatar src={selectedUser.avatar_url || selectedUser.avatar} name={selectedUser.name} />
                   <div>
-                    <p className="font-bold text-gray-900">{selectedUser.name}</p>
+                    <p className="font-bold text-gray-900 dark:text-gray-100">{selectedUser.name}</p>
                     {typingUser ? (
                       <p className="text-xs text-indigo-500 font-medium animate-pulse">
                         typing...
@@ -525,7 +525,7 @@ function MessagesContent() {
               </div>
 
               {/* Messages List */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/30" ref={scrollRef}>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/30 dark:bg-gray-900/30" ref={scrollRef}>
                 {messages.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
                     <p className="text-sm text-gray-400">
@@ -546,7 +546,7 @@ function MessagesContent() {
                           className={`max-w-[70%] px-4 py-2.5 rounded-2xl text-sm shadow-sm ${
                             isMe
                               ? "bg-indigo-600 text-white rounded-tr-none"
-                              : "bg-white text-gray-900 rounded-tl-none border border-gray-100"
+                              : "bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-tl-none border border-gray-100 dark:border-gray-600"
                           }`}
                         >
                           {isGigApp && !isMe && (
@@ -579,11 +579,11 @@ function MessagesContent() {
                 {/* Typing indicator */}
                 {typingUser && (
                   <div className="flex justify-start">
-                    <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none px-4 py-2.5 shadow-sm">
+                    <div className="bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-2xl rounded-tl-none px-4 py-2.5 shadow-sm">
                       <div className="flex gap-1">
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                        <span className="w-2 h-2 bg-gray-400 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <span className="w-2 h-2 bg-gray-400 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <span className="w-2 h-2 bg-gray-400 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                       </div>
                     </div>
                   </div>
@@ -591,7 +591,7 @@ function MessagesContent() {
               </div>
 
               {/* Input Area */}
-              <div className="p-4 border-t border-gray-100 bg-white">
+              <div className="p-4 border-t border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
                 <form onSubmit={handleSendMessage} className="flex gap-2">
                   <input
                     type="text"
@@ -601,7 +601,7 @@ function MessagesContent() {
                       handleTyping();
                     }}
                     placeholder="Type a message..."
-                    className="flex-1 px-4 py-2 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-indigo-500"
+                    className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-700 border-none rounded-xl text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-500"
                   />
                   <Button
                     type="submit"
@@ -615,11 +615,11 @@ function MessagesContent() {
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8">
-              <div className="h-20 w-20 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
-                <Send className="h-8 w-8 text-indigo-200 -rotate-12" />
+              <div className="h-20 w-20 bg-indigo-50 dark:bg-indigo-950/50 rounded-full flex items-center justify-center mb-4">
+                <Send className="h-8 w-8 text-indigo-200 dark:text-indigo-700 -rotate-12" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">Your Messages</h3>
-              <p className="text-gray-500 max-w-xs mt-1">
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Your Messages</h3>
+              <p className="text-gray-500 dark:text-gray-400 max-w-xs mt-1">
                 Select a conversation from the sidebar to start chatting with creatives and clients.
               </p>
             </div>

@@ -123,7 +123,7 @@ export default function LandingPage() {
           />
           {/* OVERLAY: Darkens the image so text is readable and blends the bottom into the next section */}
           <div className="absolute inset-0 bg-slate-950/70" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/20 to-white" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-950/20 to-white dark:to-gray-950" />
         </div>
 
         {/* Decorative Blur Orbs */}
@@ -201,13 +201,13 @@ export default function LandingPage() {
       </section>
 
       {/* Disciplines Section */}
-      <section className="py-24 bg-white relative z-10">
+      <section className="py-24 bg-white dark:bg-gray-950 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               Built for Every Creative Discipline
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Whether you style hair, write code, design brands, or create
               fashion — PortfolioU is your platform.
             </p>
@@ -242,13 +242,13 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-24 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
               Everything You Need to Get Hired
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               From building your portfolio to tracking analytics, PortfolioU
               gives you the tools to launch your creative career.
             </p>
@@ -257,15 +257,15 @@ export default function LandingPage() {
             {features.map((feature) => (
               <div
                 key={feature.title}
-                className="bg-white rounded-2xl p-8 border border-gray-200 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-100/50 transition-all duration-300"
+                className="bg-white dark:bg-gray-800 rounded-2xl p-8 border border-gray-200 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-700 hover:shadow-lg hover:shadow-indigo-100/50 dark:hover:shadow-indigo-900/20 transition-all duration-300"
               >
-                <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center mb-5">
-                  <feature.icon className="h-6 w-6 text-indigo-600" />
+                <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center mb-5">
+                  <feature.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
                   {feature.description}
                 </p>
               </div>

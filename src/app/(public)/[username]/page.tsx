@@ -51,7 +51,7 @@ export default function PublicPortfolioPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
         <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
       </div>
     );
@@ -59,9 +59,9 @@ export default function PublicPortfolioPage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">404</h1>
-        <p className="text-gray-500 text-center max-w-md">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2">404</h1>
+        <p className="text-gray-500 dark:text-gray-400 text-center max-w-md">
           We couldn&apos;t find the portfolio you&apos;re looking for. The user may have changed their username or deleted their account.
         </p>
         <Button className="mt-8" onClick={() => window.location.href = "/"}>
@@ -72,7 +72,7 @@ export default function PublicPortfolioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20">
       <ViewTracker profileId={profile.id} />
       
       {/* Cover Header */}
@@ -97,10 +97,10 @@ export default function PublicPortfolioPage() {
               src={profile.avatar_url || profile.avatar}
               name={profile.name}
               size="xl"
-              className="h-40 w-40 sm:h-48 sm:w-48 border-8 border-white shadow-2xl"
+              className="h-40 w-40 sm:h-48 sm:w-48 border-8 border-white dark:border-gray-950 shadow-2xl"
             />
             <div className="text-center sm:text-left pb-4">
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 flex items-center gap-2">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 {profile.name}
                 {profile.is_premium && <Sparkles className="h-6 w-6 text-amber-500" />}
               </h1>
@@ -114,7 +114,7 @@ export default function PublicPortfolioPage() {
                   </span>
                 )}
               </div>
-              <div className="flex flex-wrap justify-center sm:justify-start items-center gap-4 mt-3 text-gray-500">
+              <div className="flex flex-wrap justify-center sm:justify-start items-center gap-4 mt-3 text-gray-500 dark:text-gray-400">
                 <span className="flex items-center gap-1 text-sm">
                   <MapPin className="h-4 w-4" /> {profile.location || "Earth"}
                 </span>
@@ -148,13 +148,13 @@ export default function PublicPortfolioPage() {
           {/* Bio & Skills */}
           <div className="space-y-6">
             <Card className="p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">About Me</h2>
-              <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">About Me</h2>
+              <p className="text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
                 {profile.bio || "No bio provided yet."}
               </p>
-              
+
               <div className="mt-8">
-                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Skills</h3>
+                <h3 className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Skills</h3>
                 <div className="flex flex-wrap gap-2">
                   {profile.skills?.map((skill: string) => (
                     <Badge key={skill} variant="secondary" className="px-3 py-1 bg-indigo-50 text-indigo-700 border-indigo-100">
@@ -162,32 +162,32 @@ export default function PublicPortfolioPage() {
                     </Badge>
                   ))}
                   {(!profile.skills || profile.skills.length === 0) && (
-                    <span className="text-sm text-gray-400 italic">No skills listed</span>
+                    <span className="text-sm text-gray-400 dark:text-gray-500 italic">No skills listed</span>
                   )}
                 </div>
               </div>
 
               {profile.social_links && Object.keys(profile.social_links).length > 0 && (
-                <div className="mt-8 pt-8 border-t border-gray-100">
-                  <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Connect</h3>
+                <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-700">
+                  <h3 className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Connect</h3>
                   <div className="flex gap-4">
                     {profile.social_links.instagram && (
-                      <a href={profile.social_links.instagram} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                      <a href={profile.social_links.instagram} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                         <AtSign className="h-5 w-5" />
                       </a>
                     )}
                     {profile.social_links.website && (
-                      <a href={profile.social_links.website} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                      <a href={profile.social_links.website} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                         <Globe className="h-5 w-5" />
                       </a>
                     )}
                     {profile.social_links.linkedin && (
-                      <a href={profile.social_links.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                      <a href={profile.social_links.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                         <Link2 className="h-5 w-5" />
                       </a>
                     )}
                     {profile.social_links.email && (
-                      <a href={`mailto:${profile.social_links.email}`} className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                      <a href={`mailto:${profile.social_links.email}`} className="p-2 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
                         <Mail className="h-5 w-5" />
                       </a>
                     )}
@@ -199,19 +199,19 @@ export default function PublicPortfolioPage() {
 
           {/* Portfolio Grid */}
           <div className="lg:col-span-2">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
               Featured Work <Badge className="bg-indigo-600">{samples.length}</Badge>
             </h2>
             
             {samples.length === 0 ? (
-              <Card className="p-20 text-center bg-white border-2 border-dashed">
-                <p className="text-gray-400">This creative hasn&apos;t uploaded any work yet.</p>
+              <Card className="p-20 text-center bg-white dark:bg-gray-800 border-2 border-dashed dark:border-gray-700">
+                <p className="text-gray-400 dark:text-gray-500">This creative hasn&apos;t uploaded any work yet.</p>
               </Card>
             ) : (
               <div className="grid sm:grid-cols-2 gap-6">
                 {samples.map((sample) => (
-                  <Card key={sample.id} className="overflow-hidden group cursor-pointer hover:shadow-2xl transition-all duration-300">
-                    <div className="aspect-video relative overflow-hidden bg-gray-100">
+                  <Card key={sample.id} className="overflow-hidden group cursor-pointer hover:shadow-2xl dark:hover:shadow-black/50 transition-all duration-300">
+                    <div className="aspect-video relative overflow-hidden bg-gray-100 dark:bg-gray-700">
                       {sample.sample_type === "image" && sample.media ? (
                         <img
                           src={sample.media}
@@ -228,7 +228,7 @@ export default function PublicPortfolioPage() {
                       </div>
                     </div>
                     <div className="p-5">
-                      <h3 className="font-bold text-gray-900 group-hover:text-indigo-600 transition-colors flex items-center justify-between">
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center justify-between">
                         {sample.title}
                         {sample.link && <ExternalLink className="h-4 w-4" />}
                       </h3>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { AuthProvider } from "@/components/layout/auth-provider";
 import { WebSocketProvider } from "@/components/layout/ws-provider";
+import { ThemeProvider } from "@/components/layout/theme-provider";
 import { Navbar } from "@/components/layout/navbar";
 import { ToastContainer } from "@/components/ui/toast";
 import "./globals.css";
@@ -14,7 +15,6 @@ export const metadata: Metadata = {
     "creative marketplace",
     "student talent",
   ],
-  // Add the icons section here
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -39,14 +39,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-white text-gray-900 antialiased scroll-smooth" suppressHydrationWarning>
-        <AuthProvider>
-          <WebSocketProvider>
-            <Navbar />
-            <ToastContainer />
-            {children}
-          </WebSocketProvider>
-        </AuthProvider>
+      <body
+        className="bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 antialiased scroll-smooth transition-colors duration-200"
+        suppressHydrationWarning
+      >
+        <ThemeProvider>
+          <AuthProvider>
+            <WebSocketProvider>
+              <Navbar />
+              <ToastContainer />
+              {children}
+            </WebSocketProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -52,7 +52,7 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -64,21 +64,21 @@ export default function AdminLayout({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto",
+          "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col transition-transform duration-200 lg:translate-x-0 lg:static lg:z-auto",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         {/* Header */}
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200">
+        <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-center h-9 w-9 rounded-lg bg-indigo-600">
             <Shield className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-base font-bold text-gray-900">Admin Panel</h1>
-            <p className="text-xs text-gray-500">PortfolioU</p>
+            <h1 className="text-base font-bold text-gray-900 dark:text-gray-100">Admin Panel</h1>
+            <p className="text-xs text-gray-500 dark:text-gray-400">PortfolioU</p>
           </div>
           <button
-            className="ml-auto lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-600 cursor-pointer"
+            className="ml-auto lg:hidden p-1 rounded-md text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-pointer"
             onClick={() => setSidebarOpen(false)}
           >
             <X className="h-5 w-5" />
@@ -97,11 +97,11 @@ export default function AdminLayout({
                 className={cn(
                   "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                   isActive
-                    ? "bg-indigo-50 text-indigo-700"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400"
+                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
                 )}
               >
-                <item.icon className={cn("h-5 w-5", isActive ? "text-indigo-600" : "text-gray-400")} />
+                <item.icon className={cn("h-5 w-5", isActive ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500")} />
                 {item.label}
               </Link>
             );
@@ -109,12 +109,12 @@ export default function AdminLayout({
         </nav>
 
         {/* Back to app */}
-        <div className="px-3 py-4 border-t border-gray-200">
+        <div className="px-3 py-4 border-t border-gray-200 dark:border-gray-700">
           <Link
             href="/dashboard"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
-            <ArrowLeft className="h-5 w-5 text-gray-400" />
+            <ArrowLeft className="h-5 w-5 text-gray-400 dark:text-gray-500" />
             Back to App
           </Link>
         </div>
@@ -123,14 +123,14 @@ export default function AdminLayout({
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile header */}
-        <header className="flex items-center gap-4 px-4 py-3 bg-white border-b border-gray-200 lg:hidden">
+        <header className="flex items-center gap-4 px-4 py-3 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 lg:hidden">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 cursor-pointer"
+            className="p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer"
           >
             <Menu className="h-5 w-5" />
           </button>
-          <h1 className="text-base font-semibold text-gray-900">Admin Panel</h1>
+          <h1 className="text-base font-semibold text-gray-900 dark:text-gray-100">Admin Panel</h1>
         </header>
 
         {/* Page content */}

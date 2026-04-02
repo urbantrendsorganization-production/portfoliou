@@ -2,6 +2,7 @@
 
 import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
+import { useTheme } from "@/components/layout/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -9,7 +10,7 @@ import { DISCIPLINES } from "@/utils/constants";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
-import { Sparkles, Users, Briefcase } from "lucide-react";
+import { Users, Briefcase } from "lucide-react";
 import { cn } from "@/utils/helpers";
 import type { Role } from "@/types/database";
 import { GoogleSignInButton } from "@/components/auth/google-signin-button";
@@ -29,6 +30,7 @@ function SignupForm() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
   const setProfile = useAppStore((s) => s.setProfile);
+  const { theme } = useTheme();
 
   async function handleGoogleSignup(credential: string) {
     setError("");
@@ -99,30 +101,31 @@ function SignupForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 pt-16 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 pt-16 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-4">
           <Link href="/" className="inline-flex items-center gap-2 mb-2">
-            <div className="rounded-xl bg-gradient-to-br flex items-center justify-center">
+            <div className="rounded-xl flex items-center justify-center">
               <img
-                src="https://res.cloudinary.com/dvifkm1ex/image/upload/v1774943398/PortfolioU_1_bqx4cv.png"
+                src={
+                  theme === "dark"
+                    ? "https://res.cloudinary.com/dvifkm1ex/image/upload/v1775138239/PortfolioU_2_cpgk61.png"
+                    : "https://res.cloudinary.com/dvifkm1ex/image/upload/v1774943398/PortfolioU_1_bqx4cv.png"
+                }
                 alt="Logo"
-                className="w-10" // Adjust w-10 (2.5rem) to your preferred size
+                className="w-10"
               />
             </div>
-            {/* <span className="font-bold text-2xl text-gray-900">
-              Portfolio<span className="text-blue-600">U</span>
-            </span> */}
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             Create your account
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
             Join the talent marketplace for college creatives
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-8">
           {/* Role selector */}
           <div className="grid grid-cols-2 gap-3 mb-6">
             <button
@@ -131,20 +134,20 @@ function SignupForm() {
               className={cn(
                 "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all cursor-pointer",
                 role === "student"
-                  ? "border-indigo-600 bg-indigo-50"
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40"
+                  : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
               )}
             >
               <Users
                 className={cn(
                   "h-6 w-6",
-                  role === "student" ? "text-indigo-600" : "text-gray-400"
+                  role === "student" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"
                 )}
               />
               <span
                 className={cn(
                   "text-sm font-semibold",
-                  role === "student" ? "text-indigo-600" : "text-gray-600"
+                  role === "student" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-600 dark:text-gray-400"
                 )}
               >
                 Student
@@ -156,20 +159,20 @@ function SignupForm() {
               className={cn(
                 "flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all cursor-pointer",
                 role === "client"
-                  ? "border-indigo-600 bg-indigo-50"
-                  : "border-gray-200 hover:border-gray-300"
+                  ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40"
+                  : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
               )}
             >
               <Briefcase
                 className={cn(
                   "h-6 w-6",
-                  role === "client" ? "text-indigo-600" : "text-gray-400"
+                  role === "client" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-400 dark:text-gray-500"
                 )}
               />
               <span
                 className={cn(
                   "text-sm font-semibold",
-                  role === "client" ? "text-indigo-600" : "text-gray-600"
+                  role === "client" ? "text-indigo-600 dark:text-indigo-400" : "text-gray-600 dark:text-gray-400"
                 )}
               >
                 Client / Business
@@ -178,7 +181,7 @@ function SignupForm() {
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
+            <div className="bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 text-sm rounded-lg px-4 py-3 mb-4">
               {error}
             </div>
           )}
@@ -195,10 +198,10 @@ function SignupForm() {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
+              <div className="w-full border-t border-gray-200 dark:border-gray-600" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-4 text-gray-400">or sign up with email</span>
+              <span className="bg-white dark:bg-gray-800 px-4 text-gray-400 dark:text-gray-500">or sign up with email</span>
             </div>
           </div>
 
@@ -262,11 +265,11 @@ function SignupForm() {
           </form>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-6">
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
           Already have an account?{" "}
           <Link
             href="/login"
-            className="text-indigo-600 font-semibold hover:text-indigo-700"
+            className="text-indigo-600 dark:text-indigo-400 font-semibold hover:text-indigo-700 dark:hover:text-indigo-300"
           >
             Sign in
           </Link>

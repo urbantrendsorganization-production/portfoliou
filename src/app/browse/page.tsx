@@ -122,28 +122,28 @@ export default function BrowsePage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 mb-3 flex items-center gap-3">
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-3">
             Discover Student Talent{" "}
             <Sparkles className="h-6 w-6 text-amber-500" />
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl">
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
             Browse and connect with the best college creatives in beauty, tech,
             design, and fashion.
           </p>
         </div>
 
         {/* Filters */}
-        <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-200 mb-8 flex flex-col md:flex-row gap-4">
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8 flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search by name, skills, or school..."
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -163,9 +163,9 @@ export default function BrowsePage() {
 
         {/* Results count */}
         {!loading && (
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
             Showing{" "}
-            <span className="font-semibold text-gray-900">
+            <span className="font-semibold text-gray-900 dark:text-gray-100">
               {filteredTalents.length}
             </span>{" "}
             {filteredTalents.length === 1 ? "creative" : "creatives"}
@@ -173,7 +173,7 @@ export default function BrowsePage() {
               <>
                 {" "}
                 in{" "}
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-gray-900 dark:text-gray-100">
                   {discipline}
                 </span>
               </>
@@ -190,14 +190,14 @@ export default function BrowsePage() {
             </p>
           </div>
         ) : filteredTalents.length === 0 ? (
-          <div className="text-center py-32 bg-white rounded-3xl border border-gray-200">
-            <div className="h-20 w-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Search className="h-8 w-8 text-gray-300" />
+          <div className="text-center py-32 bg-white dark:bg-gray-800 rounded-3xl border border-gray-200 dark:border-gray-700">
+            <div className="h-20 w-20 bg-gray-50 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Search className="h-8 w-8 text-gray-300 dark:text-gray-500" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
               No talent found
             </h3>
-            <p className="text-gray-500 mt-2">
+            <p className="text-gray-500 dark:text-gray-400 mt-2">
               Try adjusting your filters or search terms.
             </p>
           </div>
@@ -214,7 +214,7 @@ export default function BrowsePage() {
                   key={talent.id}
                   href={`/${talent.username && talent.username.trim() ? talent.username : talent.user_username}`}
                 >
-                  <Card className="h-full overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group bg-white">
+                  <Card className="h-full overflow-hidden hover:shadow-xl dark:hover:shadow-black/40 hover:-translate-y-1 transition-all duration-300 group bg-white dark:bg-gray-800">
                     {/* Cover Image / Gradient Banner */}
                     <div className="h-36 relative overflow-hidden">
                       {coverUrl ? (
@@ -285,26 +285,26 @@ export default function BrowsePage() {
                           src={talent.avatar_url || talent.avatar}
                           name={talent.name}
                           size="lg"
-                          className="border-[3px] border-white shadow-md"
+                          className="border-[3px] border-white dark:border-gray-800 shadow-md"
                         />
                       </div>
 
                       <div className="pt-10">
                         {/* Name */}
-                        <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors leading-tight">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-tight">
                           {talent.name}
                         </h3>
 
                         {/* Discipline */}
-                        <p className="text-sm font-semibold text-indigo-600 mt-0.5">
+                        <p className="text-sm font-semibold text-indigo-600 dark:text-indigo-400 mt-0.5">
                           {talent.discipline || "Creative"}
                         </p>
 
                         {/* School & Location */}
-                        <div className="flex items-center gap-3 mt-2 text-xs text-gray-500">
+                        <div className="flex items-center gap-3 mt-2 text-xs text-gray-500 dark:text-gray-400">
                           {talent.school && (
                             <span className="flex items-center gap-1">
-                              <GraduationCap className="h-3.5 w-3.5 text-gray-400" />
+                              <GraduationCap className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
                               <span className="truncate max-w-[120px]">
                                 {talent.school}
                               </span>
@@ -312,7 +312,7 @@ export default function BrowsePage() {
                           )}
                           {talent.location && (
                             <span className="flex items-center gap-1">
-                              <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                              <MapPin className="h-3.5 w-3.5 text-gray-400 dark:text-gray-500" />
                               <span className="truncate max-w-[100px]">
                                 {talent.location}
                               </span>
@@ -322,7 +322,7 @@ export default function BrowsePage() {
 
                         {/* Bio snippet */}
                         {talent.bio && (
-                          <p className="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 line-clamp-2 leading-relaxed">
                             {talent.bio}
                           </p>
                         )}
@@ -351,11 +351,11 @@ export default function BrowsePage() {
                         </div>
 
                         {/* Footer */}
-                        <div className="pt-4 mt-4 border-t border-gray-100 flex items-center justify-between">
-                          <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+                        <div className="pt-4 mt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                          <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                             View Portfolio
                           </span>
-                          <ArrowRight className="h-4 w-4 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                          <ArrowRight className="h-4 w-4 text-gray-400 dark:text-gray-500 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:translate-x-1 transition-all" />
                         </div>
                       </div>
                     </div>

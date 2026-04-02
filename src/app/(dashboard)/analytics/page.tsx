@@ -78,8 +78,8 @@ export default function AnalyticsPage() {
     <DashboardShell>
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Analytics</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
             Track your portfolio performance and audience engagement.
           </p>
         </div>
@@ -88,34 +88,34 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-indigo-50 text-indigo-600">
+              <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
                 <Users className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Total Profile Views</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalViews}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Profile Views</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalViews}</p>
               </div>
             </div>
           </Card>
           <Card className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-purple-50 text-purple-600">
+              <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
                 <MousePointer2 className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Total Link Clicks</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalClicks}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Total Link Clicks</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalClicks}</p>
               </div>
             </div>
           </Card>
           <Card className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-pink-50 text-pink-600">
+              <div className="p-3 rounded-xl bg-pink-50 dark:bg-pink-950/60 text-pink-600 dark:text-pink-400">
                 <FileText className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Work Sample Views</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalSampleViews}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Work Sample Views</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{stats.totalSampleViews}</p>
               </div>
             </div>
           </Card>
@@ -124,15 +124,15 @@ export default function AnalyticsPage() {
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="p-6">
-            <h3 className="font-bold text-gray-900 mb-6">Views Over Time</h3>
+            <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-6">Views Over Time</h3>
             <div className="h-80 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-gray-200 dark:text-gray-700" />
+                  <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} tick={{ fill: "currentColor" }} className="text-gray-500 dark:text-gray-400" />
+                  <YAxis fontSize={12} tickLine={false} axisLine={false} tick={{ fill: "currentColor" }} className="text-gray-500 dark:text-gray-400" />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', backgroundColor: 'var(--tooltip-bg, #fff)' }}
                   />
                   <Line 
                     type="monotone" 
@@ -149,15 +149,15 @@ export default function AnalyticsPage() {
           </Card>
 
           <Card className="p-6">
-            <h3 className="font-bold text-gray-900 mb-6">Engagement by Day</h3>
+            <h3 className="font-bold text-gray-900 dark:text-gray-100 mb-6">Engagement by Day</h3>
             <div className="h-80 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-gray-200 dark:text-gray-700" />
+                  <XAxis dataKey="date" fontSize={12} tickLine={false} axisLine={false} tick={{ fill: "currentColor" }} className="text-gray-500 dark:text-gray-400" />
+                  <YAxis fontSize={12} tickLine={false} axisLine={false} tick={{ fill: "currentColor" }} className="text-gray-500 dark:text-gray-400" />
+                  <Tooltip
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.15)', backgroundColor: 'var(--tooltip-bg, #fff)' }}
                   />
                   <Bar 
                     dataKey="link_click" 

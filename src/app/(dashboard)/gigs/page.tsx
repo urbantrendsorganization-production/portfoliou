@@ -243,8 +243,8 @@ export default function GigsPage() {
       <div className="space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gig Board</h1>
-            <p className="text-gray-500 mt-1">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Gig Board</h1>
+            <p className="text-gray-500 dark:text-gray-400 mt-1">
               {isClient
                 ? "Manage your gigs and review applicants."
                 : "Find paid opportunities from clients."}
@@ -260,8 +260,8 @@ export default function GigsPage() {
         {/* Client: My Posted Gigs with Applications */}
         {isClient && myGigs.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <Briefcase className="h-5 w-5 text-indigo-600" /> My Posted Gigs
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <Briefcase className="h-5 w-5 text-indigo-600 dark:text-indigo-400" /> My Posted Gigs
             </h2>
             <div className="grid gap-4">
               {myGigs.map((gig) => {
@@ -281,11 +281,11 @@ export default function GigsPage() {
                               {gig.status}
                             </Badge>
                           </div>
-                          <h3 className="text-xl font-bold text-gray-900">{gig.title}</h3>
+                          <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{gig.title}</h3>
                           <div className="flex flex-wrap gap-4">
-                            <span className="flex items-center gap-1.5 text-sm text-gray-500">
-                              <DollarSign className="h-4 w-4 text-green-600" />
-                              <span className="font-semibold text-gray-900">{gig.budget}</span>
+                            <span className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                              <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              <span className="font-semibold text-gray-900 dark:text-gray-100">{gig.budget}</span>
                             </span>
                             {gig.deadline && (
                               <span className="flex items-center gap-1.5 text-sm text-gray-500">
@@ -313,18 +313,18 @@ export default function GigsPage() {
 
                     {/* Applicants Section */}
                     {isExpanded && (
-                      <div className="border-t border-gray-100 bg-gray-50/50">
+                      <div className="border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/30">
                         {loadingApps === gig.id ? (
                           <div className="flex justify-center py-8">
                             <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
                           </div>
                         ) : gigApps.length === 0 ? (
                           <div className="p-8 text-center">
-                            <Users className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                            <p className="text-sm text-gray-500">No applications yet.</p>
+                            <Users className="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                            <p className="text-sm text-gray-500 dark:text-gray-400">No applications yet.</p>
                           </div>
                         ) : (
-                          <div className="divide-y divide-gray-100">
+                          <div className="divide-y divide-gray-100 dark:divide-gray-700">
                             {gigApps.map((app: any) => (
                               <div key={app.id} className="p-5 flex flex-col sm:flex-row sm:items-center gap-4">
                                 <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -335,7 +335,7 @@ export default function GigsPage() {
                                   />
                                   <div className="min-w-0">
                                     <div className="flex items-center gap-2">
-                                      <p className="font-semibold text-gray-900 truncate">
+                                      <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                                         {app.student_name}
                                       </p>
                                       {app.status !== "pending" && (
@@ -351,21 +351,21 @@ export default function GigsPage() {
                                         </Badge>
                                       )}
                                     </div>
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
                                       {app.student_discipline} &middot; Applied {new Date(app.created_at).toLocaleDateString()}
                                     </p>
                                   </div>
                                 </div>
 
                                 {app.message && (
-                                  <div className="sm:hidden bg-white rounded-lg p-3 border border-gray-100">
-                                    <p className="text-sm text-gray-600 italic">&ldquo;{app.message}&rdquo;</p>
+                                  <div className="sm:hidden bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
+                                    <p className="text-sm text-gray-600 dark:text-gray-300 italic">&ldquo;{app.message}&rdquo;</p>
                                   </div>
                                 )}
 
                                 <div className="hidden sm:block flex-1 max-w-sm">
                                   {app.message && (
-                                    <p className="text-sm text-gray-600 italic line-clamp-2">
+                                    <p className="text-sm text-gray-600 dark:text-gray-300 italic line-clamp-2">
                                       &ldquo;{app.message}&rdquo;
                                     </p>
                                   )}
@@ -429,16 +429,16 @@ export default function GigsPage() {
 
         {/* Divider for clients */}
         {isClient && myGigs.length > 0 && gigs.length > 0 && (
-          <div className="border-t border-gray-200 pt-4">
-            <h2 className="text-lg font-bold text-gray-900">Other Open Gigs</h2>
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Other Open Gigs</h2>
           </div>
         )}
 
         {/* Student: My Applications */}
         {isStudent && myApplications.length > 0 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-indigo-600" /> My Applications
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
+              <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" /> My Applications
             </h2>
 
             {/* Filter Tabs */}
@@ -450,7 +450,7 @@ export default function GigsPage() {
                   className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
                     appFilter === key
                       ? "bg-indigo-600 text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                   }`}
                 >
                   {label}
@@ -459,7 +459,7 @@ export default function GigsPage() {
                       className={`ml-2 inline-flex items-center justify-center px-2 py-0.5 rounded-full text-xs font-semibold ${
                         appFilter === key
                           ? "bg-white/20 text-white"
-                          : "bg-gray-200 text-gray-700"
+                          : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200"
                       }`}
                     >
                       {statusCounts[key]}
@@ -484,19 +484,19 @@ export default function GigsPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="space-y-2 flex-1 min-w-0">
                         <div className="flex items-center gap-3 flex-wrap">
-                          <h3 className="font-semibold text-gray-900 truncate">
+                          <h3 className="font-semibold text-gray-900 dark:text-gray-100 truncate">
                             {app.gig_title}
                           </h3>
                           {getStatusBadge(app.status)}
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                        <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3.5 w-3.5" />
                             Applied {new Date(app.created_at).toLocaleDateString()}
                           </span>
                         </div>
                         {app.message && (
-                          <p className="text-sm text-gray-600 line-clamp-2 italic">
+                          <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2 italic">
                             &ldquo;{app.message}&rdquo;
                           </p>
                         )}
@@ -509,8 +509,8 @@ export default function GigsPage() {
 
             {/* Divider before open gigs */}
             {gigs.length > 0 && (
-              <div className="border-t border-gray-200 pt-4">
-                <h2 className="text-lg font-bold text-gray-900">Open Gigs</h2>
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Open Gigs</h2>
               </div>
             )}
           </div>
@@ -524,7 +524,7 @@ export default function GigsPage() {
               <input
                 type="text"
                 placeholder="Search gigs..."
-                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
             <Select
@@ -559,15 +559,15 @@ export default function GigsPage() {
                       </span>
                       <span className="text-xs text-gray-400">Posted by {gig.client_name}</span>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900">{gig.title}</h3>
-                    <p className="text-gray-600 text-sm max-w-2xl">{gig.description}</p>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">{gig.title}</h3>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm max-w-2xl">{gig.description}</p>
                     <div className="flex flex-wrap gap-4 pt-2">
-                      <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                        <DollarSign className="h-4 w-4 text-green-600" />
-                        <span className="font-semibold text-gray-900">{gig.budget}</span>
+                      <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
+                        <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+                        <span className="font-semibold text-gray-900 dark:text-gray-100">{gig.budget}</span>
                       </div>
                       {gig.deadline && (
-                        <div className="flex items-center gap-1.5 text-sm text-gray-500">
+                        <div className="flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400">
                           <Calendar className="h-4 w-4" />
                           Expires {new Date(gig.deadline).toLocaleDateString()}
                         </div>
@@ -593,9 +593,9 @@ export default function GigsPage() {
 
       {/* Post Gig Modal */}
       {showPostModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 dark:bg-black/70 backdrop-blur-sm">
           <Card className="w-full max-w-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Post a New Gig</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Post a New Gig</h2>
             <form onSubmit={handlePostGig} className="space-y-4">
               <Input
                 label="Job Title"
@@ -648,10 +648,10 @@ export default function GigsPage() {
 
       {/* Apply Modal */}
       {applyingTo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 dark:bg-black/70 backdrop-blur-sm">
           <Card className="w-full max-w-md p-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Apply for this Gig</h2>
-            <p className="text-sm text-gray-500 mb-6">Introduce yourself and explain why you&apos;re a good fit.</p>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">Apply for this Gig</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Introduce yourself and explain why you&apos;re a good fit.</p>
             <Textarea
               label="Cover Letter / Message"
               value={applicationMessage}

@@ -87,9 +87,9 @@ function ToggleSwitch({
   return (
     <label className="flex items-center justify-between py-3 cursor-pointer group">
       <div className="pr-4">
-        <p className="text-sm font-medium text-gray-900">{label}</p>
+        <p className="text-sm font-medium text-gray-900 dark:text-gray-100">{label}</p>
         {description && (
-          <p className="text-xs text-gray-500 mt-0.5">{description}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{description}</p>
         )}
       </div>
       <button
@@ -97,8 +97,8 @@ function ToggleSwitch({
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-          checked ? "bg-indigo-600" : "bg-gray-200"
+        className={`relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 ${
+          checked ? "bg-indigo-600" : "bg-gray-200 dark:bg-gray-600"
         }`}
       >
         <span
@@ -367,10 +367,10 @@ export default function SettingsPage() {
     <DashboardShell>
       <div className="max-w-4xl space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             Account Settings
           </h1>
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
             Manage your profile information and account preferences.
           </p>
         </div>
@@ -402,8 +402,8 @@ export default function SettingsPage() {
                 </label>
               </div>
               <div className="mt-4">
-                <h3 className="font-bold text-gray-900">{profile.name}</h3>
-                <p className="text-sm text-gray-500 capitalize">
+                <h3 className="font-bold text-gray-900 dark:text-gray-100">{profile.name}</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 capitalize">
                   {profile.role}
                 </p>
               </div>
@@ -417,8 +417,8 @@ export default function SettingsPage() {
                     onClick={() => setActiveTab(key)}
                     className={`w-full text-left px-3 py-2 text-sm font-medium rounded-lg flex items-center gap-2 transition-colors ${
                       activeTab === key
-                        ? "bg-indigo-50 text-indigo-600"
-                        : "text-gray-600 hover:bg-gray-50"
+                        ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400"
+                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"
                     }`}
                   >
                     <Icon className="h-4 w-4" />
@@ -439,7 +439,7 @@ export default function SettingsPage() {
                   <h3 className="text-sm font-semibold text-gray-900 mb-4">
                     Cover Photo
                   </h3>
-                  <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                  <div className="relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
                     {profile.cover_image_url ? (
                       <img
                         src={profile.cover_image_url}
@@ -447,13 +447,13 @@ export default function SettingsPage() {
                         className="w-full h-40 object-cover"
                       />
                     ) : (
-                      <div className="w-full h-40 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                        <p className="text-sm text-gray-400">
+                      <div className="w-full h-40 flex items-center justify-center bg-gradient-to-br from-gray-100 dark:from-gray-700 to-gray-200 dark:to-gray-800">
+                        <p className="text-sm text-gray-400 dark:text-gray-500">
                           No cover photo set
                         </p>
                       </div>
                     )}
-                    <label className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-2 bg-white/90 backdrop-blur-sm rounded-lg shadow border border-gray-200 cursor-pointer hover:bg-white transition-colors text-sm font-medium text-gray-700">
+                    <label className="absolute bottom-3 right-3 inline-flex items-center gap-2 px-3 py-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-lg shadow border border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-white dark:hover:bg-gray-800 transition-colors text-sm font-medium text-gray-700 dark:text-gray-300">
                       {uploadingCover ? (
                         <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
                       ) : (
@@ -539,7 +539,7 @@ export default function SettingsPage() {
                     />
 
                     {profile.role === "student" && (
-                      <div className="rounded-lg border border-gray-200 p-4">
+                      <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-4">
                         <ToggleSwitch
                           checked={profile.open_to_work}
                           onChange={handleToggleOpenToWork}
@@ -555,7 +555,7 @@ export default function SettingsPage() {
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
                       <div className="flex items-center gap-2">
                         {success && (
                           <span className="flex items-center gap-1 text-sm text-green-600 animate-in fade-in slide-in-from-left-2">
@@ -577,10 +577,10 @@ export default function SettingsPage() {
               <>
                 {/* Email display */}
                 <Card className="p-8">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
                     Email Address
                   </h3>
-                  <p className="text-sm text-gray-500 mb-4">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                     Your email is associated with your account and cannot be
                     changed here.
                   </p>
@@ -594,10 +594,10 @@ export default function SettingsPage() {
 
                 {/* Change Password */}
                 <Card className="p-8">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
                     Change Password
                   </h3>
-                  <p className="text-sm text-gray-500 mb-6">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                     Update your password to keep your account secure.
                   </p>
 
@@ -665,16 +665,16 @@ export default function SettingsPage() {
                 </Card>
 
                 {/* Danger Zone */}
-                <Card className="p-8 border-red-200">
+                <Card className="p-8 border-red-200 dark:border-red-900">
                   <div className="flex items-start gap-3">
-                    <div className="p-2 bg-red-50 rounded-lg">
+                    <div className="p-2 bg-red-50 dark:bg-red-950/50 rounded-lg">
                       <AlertTriangle className="h-5 w-5 text-red-500" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-red-900">
+                      <h3 className="text-lg font-semibold text-red-900 dark:text-red-400">
                         Delete Account
                       </h3>
-                      <p className="text-sm text-gray-600 mt-1 mb-4">
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 mb-4">
                         Once you delete your account, there is no going back.
                         All your data, projects, and connections will be
                         permanently removed.
@@ -749,10 +749,10 @@ export default function SettingsPage() {
                 <Card className="p-8">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
                         Current Plan
                       </h3>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                         Manage your subscription and billing details.
                       </p>
                     </div>
@@ -783,14 +783,14 @@ export default function SettingsPage() {
                     </div>
                   ) : (
                     <div className="space-y-6">
-                      <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 p-6">
-                        <h4 className="font-semibold text-gray-900 mb-3">
+                      <div className="rounded-lg border border-indigo-100 dark:border-indigo-900 bg-indigo-50/50 dark:bg-indigo-950/30 p-6">
+                        <h4 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
                           Upgrade to Premium &mdash;{" "}
                           <span className="text-indigo-600">
                             ${profile.role === "client" ? "35" : "8"}/mo
                           </span>
                         </h4>
-                        <p className="text-sm text-gray-600 mb-4">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                           Unlock powerful features to boost your visibility and
                           grow your professional presence.
                         </p>
@@ -798,7 +798,7 @@ export default function SettingsPage() {
                           {PREMIUM_BENEFITS.map((benefit) => (
                             <li
                               key={benefit}
-                              className="flex items-center gap-2 text-sm text-gray-700"
+                              className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300"
                             >
                               <CheckCircle className="h-4 w-4 text-indigo-500 flex-shrink-0" />
                               {benefit}
@@ -823,19 +823,19 @@ export default function SettingsPage() {
             {activeTab === "notifications" && (
               <>
                 <Card className="p-8">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
                     Notification Preferences
                   </h3>
-                  <p className="text-sm text-gray-500 mb-6">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                     Choose how you want to be notified about activity on your
                     account.
                   </p>
 
                   <div className="space-y-1">
-                    <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-400 uppercase tracking-wider mb-2">
                       Email Notifications
                     </h4>
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-gray-100 dark:divide-gray-700">
                       <ToggleSwitch
                         checked={notifPrefs.email_messages}
                         onChange={(v) => updateNotifPref("email_messages", v)}
@@ -862,10 +862,10 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="mt-8 space-y-1">
-                    <h4 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-2">
+                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-400 uppercase tracking-wider mb-2">
                       Push Notifications
                     </h4>
-                    <div className="divide-y divide-gray-100">
+                    <div className="divide-y divide-gray-100 dark:divide-gray-700">
                       <ToggleSwitch
                         checked={notifPrefs.push_messages}
                         onChange={(v) => updateNotifPref("push_messages", v)}

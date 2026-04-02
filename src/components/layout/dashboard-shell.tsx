@@ -19,7 +19,7 @@ function UnreadBadgeDot() {
   const count = useAppStore((s) => s.unreadMessageCount);
   if (count === 0) return null;
   return (
-    <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-indigo-600 rounded-full ring-2 ring-white" />
+    <span className="absolute top-1 right-1 h-2.5 w-2.5 bg-indigo-600 rounded-full ring-2 ring-white dark:ring-gray-900" />
   );
 }
 import {
@@ -66,18 +66,18 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const navItems = profile?.role === "client" ? clientNav : studentNav;
 
   return (
-    <div className="flex min-h-screen bg-gray-50 pt-16">
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950 pt-16">
       {/* Sidebar */}
       <aside
         className={cn(
-          "hidden lg:flex flex-col border-r border-gray-200 bg-white transition-all duration-300 fixed top-16 bottom-0",
+          "hidden lg:flex flex-col border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 transition-all duration-300 fixed top-16 bottom-0",
           collapsed ? "w-16" : "w-64"
         )}
       >
         <div className="flex-1 py-4">
           {/* Profile summary */}
           {!collapsed && profile && (
-            <div className="px-4 pb-4 mb-4 border-b border-gray-100">
+            <div className="px-4 pb-4 mb-4 border-b border-gray-100 dark:border-gray-700">
               <div className="flex items-center gap-3">
                 <Avatar
                   src={profile.avatar_url || profile.avatar}
@@ -85,7 +85,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
                   size="md"
                 />
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
                     {profile.name || "Set up profile"}
                   </p>
                   <div className="flex items-center gap-1">
@@ -114,8 +114,8 @@ export function DashboardShell({ children }: DashboardShellProps) {
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors relative",
                     isActive
-                      ? "bg-indigo-50 text-indigo-700"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
                   )}
                 >
                   <item.icon className="h-5 w-5 flex-shrink-0" />
@@ -134,7 +134,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
 
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="flex items-center justify-center p-3 border-t border-gray-200 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+          className="flex items-center justify-center p-3 border-t border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors cursor-pointer"
         >
           {collapsed ? (
             <ChevronRight className="h-5 w-5" />

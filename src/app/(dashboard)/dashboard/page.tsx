@@ -121,10 +121,10 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
               Welcome back, {profile.name || "Creative"}
             </h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-gray-500 dark:text-gray-400 mt-1">
               Here&apos;s what&apos;s happening with your{" "}
               {isStudent ? "portfolio" : "account"} today.
             </p>
@@ -152,48 +152,48 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-indigo-50 text-indigo-600">
+              <div className="p-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
                 <Eye className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Profile Views</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Profile Views</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {stats.profileViews}
                 </p>
               </div>
             </div>
-            <div className="mt-4 flex items-center text-xs text-green-600 font-medium">
+            <div className="mt-4 flex items-center text-xs text-green-600 dark:text-green-400 font-medium">
               <TrendingUp className="h-3 w-3 mr-1" /> +12% from last week
             </div>
           </Card>
 
           <Card className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-purple-50 text-purple-600">
+              <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400">
                 <MousePointer2 className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Link Clicks</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Link Clicks</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {stats.linkClicks}
                 </p>
               </div>
             </div>
-            <div className="mt-4 flex items-center text-xs text-green-600 font-medium">
+            <div className="mt-4 flex items-center text-xs text-green-600 dark:text-green-400 font-medium">
               <TrendingUp className="h-3 w-3 mr-1" /> +5% from last week
             </div>
           </Card>
 
           <Card className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-pink-50 text-pink-600">
+              <div className="p-3 rounded-xl bg-pink-50 dark:bg-pink-950/60 text-pink-600 dark:text-pink-400">
                 <FileText className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {isStudent ? "Work Samples" : "Talent Bookmarked"}
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {stats.totalSamples}
                 </p>
               </div>
@@ -202,12 +202,12 @@ export default function DashboardPage() {
 
           <Card className="p-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-xl bg-amber-50 text-amber-600">
+              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
                 <Briefcase className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Active Gigs</p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Active Gigs</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                   {stats.activeGigs}
                 </p>
               </div>
@@ -218,7 +218,7 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <Card className="p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
               Quick Actions
             </h2>
             <div className="grid grid-cols-2 gap-3">
@@ -269,41 +269,41 @@ export default function DashboardPage() {
           </Card>
 
           <Card className="p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">
               Recent Activity
             </h2>
             <div className="space-y-4">
               {recentActivity.length === 0 ? (
                 <div className="text-center py-8">
-                  <Bell className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                  <p className="text-sm text-gray-400">No recent activity yet</p>
+                  <Bell className="h-8 w-8 text-gray-300 dark:text-gray-600 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400 dark:text-gray-500">No recent activity yet</p>
                 </div>
               ) : (
                 recentActivity.map((item: any) => {
                   const iconMap: Record<string, { icon: React.ReactNode; bg: string }> = {
-                    new_message: { icon: <MessageSquare className="h-4 w-4" />, bg: "bg-blue-50 text-blue-600" },
-                    gig_application: { icon: <Briefcase className="h-4 w-4" />, bg: "bg-purple-50 text-purple-600" },
-                    application_accepted: { icon: <UserCheck className="h-4 w-4" />, bg: "bg-green-50 text-green-600" },
-                    application_rejected: { icon: <XCircle className="h-4 w-4" />, bg: "bg-red-50 text-red-600" },
-                    profile_view: { icon: <Eye className="h-4 w-4" />, bg: "bg-indigo-50 text-indigo-600" },
+                    new_message: { icon: <MessageSquare className="h-4 w-4" />, bg: "bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400" },
+                    gig_application: { icon: <Briefcase className="h-4 w-4" />, bg: "bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400" },
+                    application_accepted: { icon: <UserCheck className="h-4 w-4" />, bg: "bg-green-50 dark:bg-green-950/60 text-green-600 dark:text-green-400" },
+                    application_rejected: { icon: <XCircle className="h-4 w-4" />, bg: "bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400" },
+                    profile_view: { icon: <Eye className="h-4 w-4" />, bg: "bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400" },
                   };
                   const style = iconMap[item.notification_type] || iconMap.profile_view;
                   const timeAgo = getTimeAgo(item.created_at);
 
                   return (
-                    <div key={item.id} className="flex items-start gap-3 pb-4 border-b border-gray-100 last:border-0">
+                    <div key={item.id} className="flex items-start gap-3 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0">
                       <div className={`h-8 w-8 rounded-lg ${style.bg} flex items-center justify-center flex-shrink-0`}>
                         {style.icon}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                           {item.title}
                         </p>
                         {item.message && (
-                          <p className="text-xs text-gray-500 truncate">{item.message}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item.message}</p>
                         )}
                       </div>
-                      <span className="ml-auto text-xs text-gray-400 flex-shrink-0">{timeAgo}</span>
+                      <span className="ml-auto text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">{timeAgo}</span>
                     </div>
                   );
                 })

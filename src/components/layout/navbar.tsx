@@ -2,6 +2,7 @@
 
 import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
+import { useTheme } from "@/components/layout/theme-provider";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/utils/helpers";
@@ -16,6 +17,8 @@ import {
   Briefcase,
   Search,
   MessageSquare,
+  Sun,
+  Moon,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
@@ -40,8 +43,19 @@ export function Navbar() {
   const isLoading = useAppStore((s) => s.isLoading);
   const setProfile = useAppStore((s) => s.setProfile);
   const setIsLoading = useAppStore((s) => s.setIsLoading);
+  const { theme, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
+
+  // Determine which logo to show
+  // If we are on the landing page and NOT scrolled, we usually want the dark-mode (white) logo 
+  // because the background is typically dark/transparent.
+  const isLanding = pathname === "/";
+  const navbarScrolled = scrolled || !isLanding;
+
+  const logoSrc = (theme === "dark" || (!navbarScrolled && isLanding))
+    ? "https://res.cloudinary.com/dvifkm1ex/image/upload/v1775138239/PortfolioU_2_cpgk61.png" // White Logo
+    : "https://res.cloudinary.com/dvifkm1ex/image/upload/v1774940835/PortfolioU_apih3l.png"; // Dark Logo
 
   useEffect(() => {
     function handleScroll() {
@@ -76,11 +90,28 @@ export function Navbar() {
     router.refresh();
   }
 
-  const isLanding = pathname === "/";
+  const ThemeToggle = ({ onDark }: { onDark?: boolean }) => (
+    <button
+      onClick={toggleTheme}
+      aria-label="Toggle theme"
+      className={cn(
+        "flex items-center justify-center h-8 w-8 rounded-lg transition-colors cursor-pointer",
+        onDark
+          ? "text-white/80 hover:text-white hover:bg-white/10"
+          : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+      )}
+    >
+      {theme === "dark" ? (
+        <Sun className="h-4 w-4" />
+      ) : (
+        <Moon className="h-4 w-4" />
+      )}
+    </button>
+  );
 
-  // Navigation Logic — Hide buttons when loading to prevent flash
   const renderAuthButtons = (isMobile = false) => {
-    if (isLoading) return <div className="w-20 h-8 bg-gray-100/10 animate-pulse rounded-lg" />;
+    if (isLoading)
+      return <div className="w-20 h-8 bg-gray-100/10 animate-pulse rounded-lg" />;
 
     if (profile) {
       if (isMobile) {
@@ -88,25 +119,25 @@ export function Navbar() {
           <>
             <Link
               href="/dashboard"
-              className="block text-gray-700 font-medium py-2"
+              className="block text-gray-700 dark:text-gray-300 font-medium py-2"
             >
               Dashboard
             </Link>
             <Link
               href="/portfolio"
-              className="block text-gray-700 font-medium py-2"
+              className="block text-gray-700 dark:text-gray-300 font-medium py-2"
             >
               My Portfolio
             </Link>
             <Link
               href="/settings"
-              className="block text-gray-700 font-medium py-2"
+              className="block text-gray-700 dark:text-gray-300 font-medium py-2"
             >
               Settings
             </Link>
             <button
               onClick={handleLogout}
-              className="block text-red-600 font-medium py-2 w-full text-left cursor-pointer"
+              className="block text-red-600 dark:text-red-400 font-medium py-2 w-full text-left cursor-pointer"
             >
               Sign Out
             </button>
@@ -128,38 +159,38 @@ export function Navbar() {
             <ChevronDown
               className={cn(
                 "h-4 w-4 transition-colors",
-                scrolled || !isLanding
-                  ? "text-gray-600"
+                navbarScrolled
+                  ? "text-gray-600 dark:text-gray-400"
                   : "text-white/80"
               )}
             />
           </button>
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-50">
-              <div className="px-4 py-2 border-b border-gray-100">
-                <p className="text-sm font-semibold text-gray-900">
+            <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg dark:shadow-black/40 border border-gray-200 dark:border-gray-700 py-2 z-50">
+              <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                   {profile.name}
                 </p>
-                <p className="text-xs text-gray-500 capitalize">
+                <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">
                   {profile.role}
                   {profile.is_premium && " Premium"}
                 </p>
               </div>
               <Link
                 href="/dashboard"
-                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 <LayoutDashboard className="h-4 w-4" /> Dashboard
               </Link>
               <Link
                 href="/portfolio"
-                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 <User className="h-4 w-4" /> My Portfolio
               </Link>
               <Link
                 href="/messages"
-                className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 <span className="flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" /> Messages
@@ -168,14 +199,14 @@ export function Navbar() {
               </Link>
               <Link
                 href="/settings"
-                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
                 <Settings className="h-4 w-4" /> Settings
               </Link>
-              <hr className="my-1 border-gray-100" />
+              <hr className="my-1 border-gray-100 dark:border-gray-700" />
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full cursor-pointer"
+                className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/50 w-full cursor-pointer"
               >
                 <LogOut className="h-4 w-4" /> Sign Out
               </button>
@@ -204,7 +235,7 @@ export function Navbar() {
       <div className="flex items-center gap-3">
         <Link href="/login">
           <Button
-            variant={scrolled || !isLanding ? "ghost" : "secondary"}
+            variant={navbarScrolled ? "ghost" : "secondary"}
             size="sm"
           >
             Log In
@@ -221,28 +252,28 @@ export function Navbar() {
     <nav
       className={cn(
         "fixed top-0 left-0 right-0 z-40 transition-all duration-300",
-        scrolled || !isLanding
-          ? "bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm"
+        navbarScrolled
+          ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm"
           : "bg-transparent"
       )}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2">
-  <img 
-    src="https://res.cloudinary.com/dvifkm1ex/image/upload/v1774940835/PortfolioU_apih3l.png" 
-    alt="Logo" 
-    className="w-38 h-auto" // Adjust w-10 (2.5rem) to your preferred size
-  />
-</Link>
+            <img
+              src={logoSrc}
+              alt="PortfolioU Logo"
+              className="w-38 h-auto transition-opacity duration-300"
+            />
+          </Link>
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-6">
             <Link
               href="/browse"
               className={cn(
-                "text-sm font-medium transition-colors hover:text-indigo-600",
-                scrolled || !isLanding ? "text-gray-600" : "text-white/80"
+                "text-sm font-medium transition-colors hover:text-indigo-600 dark:hover:text-indigo-400",
+                navbarScrolled ? "text-gray-600 dark:text-gray-300" : "text-white/80"
               )}
             >
               <span className="flex items-center gap-1">
@@ -252,8 +283,8 @@ export function Navbar() {
             <Link
               href="/gigs"
               className={cn(
-                "text-sm font-medium transition-colors hover:text-indigo-600",
-                scrolled || !isLanding ? "text-gray-600" : "text-white/80"
+                "text-sm font-medium transition-colors hover:text-indigo-600 dark:hover:text-indigo-400",
+                navbarScrolled ? "text-gray-600 dark:text-gray-300" : "text-white/80"
               )}
             >
               <span className="flex items-center gap-1">
@@ -261,46 +292,50 @@ export function Navbar() {
               </span>
             </Link>
 
+            <ThemeToggle onDark={!navbarScrolled} />
             {renderAuthButtons(false)}
           </div>
 
-          {/* Mobile toggle */}
-          <button
-            className="md:hidden cursor-pointer"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? (
-              <X
-                className={cn(
-                  "h-6 w-6",
-                  scrolled || !isLanding ? "text-gray-900" : "text-white"
-                )}
-              />
-            ) : (
-              <Menu
-                className={cn(
-                  "h-6 w-6",
-                  scrolled || !isLanding ? "text-gray-900" : "text-white"
-                )}
-              />
-            )}
-          </button>
+          {/* Mobile right side */}
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle onDark={!navbarScrolled} />
+            <button
+              className="cursor-pointer"
+              onClick={() => setMobileOpen(!mobileOpen)}
+            >
+              {mobileOpen ? (
+                <X
+                  className={cn(
+                    "h-6 w-6",
+                    navbarScrolled ? "text-gray-900 dark:text-gray-100" : "text-white"
+                  )}
+                />
+              ) : (
+                <Menu
+                  className={cn(
+                    "h-6 w-6",
+                    navbarScrolled ? "text-gray-900 dark:text-gray-100" : "text-white"
+                  )}
+                />
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-gray-200 shadow-lg">
+        <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 shadow-lg">
           <div className="px-4 py-4 space-y-3">
             <Link
               href="/browse"
-              className="block text-gray-700 font-medium py-2"
+              className="block text-gray-700 dark:text-gray-300 font-medium py-2"
             >
               Browse Talent
             </Link>
             <Link
               href="/gigs"
-              className="block text-gray-700 font-medium py-2"
+              className="block text-gray-700 dark:text-gray-300 font-medium py-2"
             >
               Gig Board
             </Link>

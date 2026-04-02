@@ -127,8 +127,8 @@ export default function PortfolioPage() {
     <DashboardShell>
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Manage Portfolio</h1>
-          <p className="text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Manage Portfolio</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">
             Showcase your best creative work to potential clients.
           </p>
         </div>
@@ -136,7 +136,7 @@ export default function PortfolioPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Add Form */}
           <Card className="p-6 h-fit lg:col-span-1">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Add New Work</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-4">Add New Work</h2>
             <form onSubmit={handleAddSample} className="space-y-4">
               <Input
                 label="Title"
@@ -145,9 +145,9 @@ export default function PortfolioPage() {
                 placeholder="e.g., Summer Fashion Campaign"
                 required
               />
-              
+
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">Type</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { id: "image", icon: ImageIcon, label: "Image" },
@@ -160,8 +160,8 @@ export default function PortfolioPage() {
                       onClick={() => setNewSample({ ...newSample, sample_type: t.id })}
                       className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
                         newSample.sample_type === t.id
-                          ? "border-indigo-600 bg-indigo-50 text-indigo-600"
-                          : "border-gray-100 hover:border-gray-200 text-gray-500"
+                          ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400"
+                          : "border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400"
                       }`}
                     >
                       <t.icon className="h-4 w-4" />
@@ -182,12 +182,12 @@ export default function PortfolioPage() {
                 />
               ) : (
                 <div className="space-y-1.5">
-                  <label className="text-sm font-medium text-gray-700">File</label>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">File</label>
                   <input
                     type="file"
                     accept={newSample.sample_type === "image" ? "image/*" : "video/*"}
                     onChange={(e) => setNewSample({ ...newSample, media: e.target.files?.[0] || null })}
-                    className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                    className="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-950 file:text-indigo-700 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900"
                     required
                   />
                 </div>
@@ -202,7 +202,7 @@ export default function PortfolioPage() {
               />
 
               <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700">Skill Tags</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Skill Tags</label>
                 <Input
                   value={tagInput}
                   onChange={(e) => setTagInput(e.target.value)}
@@ -240,21 +240,21 @@ export default function PortfolioPage() {
 
           {/* List */}
           <div className="lg:col-span-2 space-y-4">
-            <h2 className="text-lg font-bold text-gray-900">Your Work Samples</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Your Work Samples</h2>
             {loading ? (
               <div className="flex justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
+                <Loader2 className="h-8 w-8 animate-spin text-gray-300 dark:text-gray-600" />
               </div>
             ) : samples.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                <ImageIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500">No work samples added yet.</p>
+              <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                <ImageIcon className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+                <p className="text-gray-500 dark:text-gray-400">No work samples added yet.</p>
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 gap-4">
                 {samples.map((sample) => (
                   <Card key={sample.id} className="overflow-hidden group">
-                    <div className="aspect-video bg-gray-100 relative">
+                    <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative">
                       {sample.sample_type === "image" && sample.media && (
                         <img
                           src={sample.media}
@@ -263,22 +263,22 @@ export default function PortfolioPage() {
                         />
                       )}
                       {sample.sample_type === "link" && (
-                        <div className="w-full h-full flex items-center justify-center bg-indigo-50 text-indigo-600">
+                        <div className="w-full h-full flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
                           <LinkIcon className="h-8 w-8" />
                         </div>
                       )}
                       <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => handleDelete(sample.id)}
-                          className="p-2 rounded-lg bg-white/90 text-red-600 hover:bg-red-50 shadow-sm"
+                          className="p-2 rounded-lg bg-white/90 dark:bg-gray-800/90 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 shadow-sm"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </div>
                     <div className="p-4">
-                      <h3 className="font-bold text-gray-900">{sample.title}</h3>
-                      <p className="text-sm text-gray-500 line-clamp-2 mt-1">
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100">{sample.title}</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
                         {sample.description}
                       </p>
                       {sample.tags?.length > 0 && (

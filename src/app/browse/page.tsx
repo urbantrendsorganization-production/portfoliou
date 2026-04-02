@@ -212,7 +212,7 @@ export default function BrowsePage() {
               return (
                 <Link
                   key={talent.id}
-                  href={`/${talent.username || talent.user_username}`}
+                  href={`/${talent.username && talent.username.trim() ? talent.username : talent.user_username}`}
                 >
                   <Card className="h-full overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group bg-white">
                     {/* Cover Image / Gradient Banner */}
@@ -243,9 +243,9 @@ export default function BrowsePage() {
 
                       {/* Badges top-right */}
                       <div className="absolute top-3 right-3 flex items-center gap-1.5">
-                        {talent.open_to_work && (
+                        {isClient && talent.open_to_work && (
                           <span className="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                            <Briefcase className="h-3 w-3" /> HIRING
+                            <Briefcase className="h-3 w-3" /> AVAILABLE
                           </span>
                         )}
                         {talent.is_premium && (

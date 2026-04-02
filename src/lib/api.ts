@@ -72,7 +72,13 @@ async function apiRequest(endpoint: string, options: RequestOptions = {}) {
   }
 
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
+    let errorData: any = {};
+    try {
+      const text = await response.text();
+      errorData = text ? JSON.parse(text) : {};
+    } catch {
+      errorData = { detail: `Server error (${response.status})` };
+    }
     throw { status: response.status, ...errorData };
   }
 
@@ -235,6 +241,35 @@ export const api = {
     },
   },
 
+  // ── Admin ─────────────────────────────────
+  admin: {
+    stats: () => apiRequest('admin/stats/'),
+    users: async (params?: Record<string, string>) => {
+      const query = params ? new URLSearchParams(params).toString() : '';
+      const data = await apiRequest(`admin/users/${query ? `?${query}` : ''}`);
+      return extractResults(data);
+    },
+    updateUser: (id: number, body: any) =>
+      apiRequest(`admin/users/${id}/`, { method: 'PATCH', body }),
+    deleteUser: (id: number) =>
+      apiRequest(`admin/users/${id}/`, { method: 'DELETE' }),
+    gigs: async (params?: Record<string, string>) => {
+      const query = params ? new URLSearchParams(params).toString() : '';
+      const data = await apiRequest(`admin/gigs/${query ? `?${query}` : ''}`);
+      return extractResults(data);
+    },
+    deleteGig: (id: number) =>
+      apiRequest(`admin/gigs/${id}/`, { method: 'DELETE' }),
+    workSamples: async (params?: Record<string, string>) => {
+      const query = params ? new URLSearchParams(params).toString() : '';
+      const data = await apiRequest(`admin/work-samples/${query ? `?${query}` : ''}`);
+      return extractResults(data);
+    },
+    deleteWorkSample: (id: number) =>
+      apiRequest(`admin/work-samples/${id}/`, { method: 'DELETE' }),
+    activity: () => apiRequest('admin/activity/'),
+  },
+
   // ── Auth ───────────────────────────────────
   auth: {
     login: async (credentials: any) => {
@@ -244,6 +279,12 @@ export const api = {
       return data;
     },
     register: (data: any) => apiRequest('auth/register/', { method: 'POST', body: data }),
+    googleLogin: async (token: string) => {
+      const data = await apiRequest('auth/google/', { method: 'POST', body: { token } });
+      localStorage.setItem('access_token', data.access);
+      localStorage.setItem('refresh_token', data.refresh);
+      return data;
+    },
     logout: () => {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');

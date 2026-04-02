@@ -37,6 +37,7 @@ export interface Profile {
   user: number;
   user_username: string;
   email: string;
+  is_staff: boolean;
   role: Role;
   name: string;
   username: string | null;

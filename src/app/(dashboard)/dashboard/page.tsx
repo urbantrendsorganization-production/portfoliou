@@ -79,7 +79,8 @@ export default function DashboardPage() {
   }, [profile]);
 
   function copyProfileLink() {
-    const url = `${window.location.origin}/${profile?.username || profile?.user_username}`;
+    const slug = profile?.username?.trim() || profile?.user_username;
+    const url = `${window.location.origin}/${slug}`;
     navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -138,7 +139,7 @@ export default function DashboardPage() {
                 )}
                 {copied ? "Copied!" : "Copy Link"}
               </Button>
-              <Link href={`/${profile.username || profile.user_username}`} target="_blank">
+              <Link href={`/${profile.username?.trim() || profile.user_username}`} target="_blank">
                 <Button variant="secondary" size="sm">
                   <ExternalLink className="h-4 w-4" /> View Portfolio
                 </Button>

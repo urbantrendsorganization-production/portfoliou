@@ -8,16 +8,40 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Sparkles } from "lucide-react";
+import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const setProfile = useAppStore((s) => s.setProfile);
   const redirect = searchParams.get("redirect") || "/dashboard";
+
+  async function handleGoogleLogin(credential: string) {
+    setError("");
+    setGoogleLoading(true);
+    try {
+      const data = await api.auth.googleLogin(credential);
+      const profile = await api.auth.me();
+      setProfile(profile);
+
+      // If new user, send them to complete their profile
+      if (data.is_new_user) {
+        router.push("/onboarding");
+      } else {
+        router.push(redirect);
+      }
+      router.refresh();
+    } catch (err: any) {
+      setError(err.error || "Google sign-in failed. Please try again.");
+    } finally {
+      setGoogleLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -66,13 +90,32 @@ function LoginForm() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
-                {error}
-              </div>
-            )}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
+              {error}
+            </div>
+          )}
 
+          {/* Google Sign-In */}
+          <div className="mb-4">
+            <GoogleSignInButton
+              onSuccess={handleGoogleLogin}
+              onError={(err) => setError(err)}
+              text="signin_with"
+            />
+          </div>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-white px-4 text-gray-400">or continue with email</span>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               label="Username (Email)"
               type="text"

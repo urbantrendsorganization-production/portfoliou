@@ -6,93 +6,62 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { DISCIPLINES } from "@/utils/constants";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
-import { Sparkles, Users, Briefcase } from "lucide-react";
 import { cn } from "@/utils/helpers";
+import { Users, Briefcase } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import type { Role } from "@/types/database";
-import { GoogleSignInButton } from "@/components/auth/google-signin-button";
 
-function SignupForm() {
-  const searchParams = useSearchParams();
-  const initialRole = (searchParams.get("role") as Role) || "student";
+export default function OnboardingPage() {
+  const profile = useAppStore((s) => s.profile);
+  const setProfile = useAppStore((s) => s.setProfile);
+  const router = useRouter();
 
-  const [role, setRole] = useState<Role>(initialRole);
+  const [role, setRole] = useState<Role>("student");
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [discipline, setDiscipline] = useState("");
   const [school, setSchool] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const router = useRouter();
-  const setProfile = useAppStore((s) => s.setProfile);
 
-  async function handleGoogleSignup(credential: string) {
-    setError("");
-    setGoogleLoading(true);
-    try {
-      const data = await api.auth.googleLogin(credential);
-      const profile = await api.auth.me();
-      setProfile(profile);
-
-      // Always send to onboarding to pick role
-      router.push("/onboarding");
-      router.refresh();
-    } catch (err: any) {
-      setError(err.error || "Google sign-up failed. Please try again.");
-    } finally {
-      setGoogleLoading(false);
+  useEffect(() => {
+    if (profile) {
+      setName(profile.name || "");
     }
-  }
+  }, [profile]);
+
+  useEffect(() => {
+    // If no token, redirect to login
+    if (!localStorage.getItem("access_token")) {
+      router.replace("/login");
+    }
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters.");
+    if (!name.trim()) {
+      setError("Please enter your name.");
       return;
     }
 
     setLoading(true);
-
     try {
-      // 1. Register user (using email as username)
-      await api.auth.register({ 
-        username: email, 
-        email, 
-        password 
-      });
-
-      // 2. Login
-      await api.auth.login({ username: email, password });
-
-      // 3. Update profile with role-specific data
-      const me = await api.profiles.me();
+      const me = profile || (await api.profiles.me());
       const updatedProfile = await api.profiles.update(me.id, {
         role,
-        name,
+        name: name.trim(),
         discipline: role === "student" ? discipline : "",
         school: role === "student" ? school : "",
       });
-
       setProfile(updatedProfile);
-      
       router.push("/dashboard");
       router.refresh();
     } catch (err: any) {
-      console.error("Signup error:", err);
-      const msg =
-        err.username?.[0] ||
-        err.email?.[0] ||
-        err.password?.[0] ||
-        err.detail ||
-        err.error ||
-        (err.status === 400 ? "This email may already be registered. Try logging in instead." : "An unexpected error occurred.");
-      setError(msg);
+      console.error("Onboarding error:", err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -107,18 +76,15 @@ function SignupForm() {
               <img
                 src="https://res.cloudinary.com/dvifkm1ex/image/upload/v1774943398/PortfolioU_1_bqx4cv.png"
                 alt="Logo"
-                className="w-10" // Adjust w-10 (2.5rem) to your preferred size
+                className="w-10"
               />
             </div>
-            {/* <span className="font-bold text-2xl text-gray-900">
-              Portfolio<span className="text-blue-600">U</span>
-            </span> */}
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">
-            Create your account
+            Complete your profile
           </h1>
           <p className="text-gray-500 mt-1">
-            Join the talent marketplace for college creatives
+            Tell us a bit about yourself to get started
           </p>
         </div>
 
@@ -177,61 +143,19 @@ function SignupForm() {
             </button>
           </div>
 
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3 mb-4">
-              {error}
-            </div>
-          )}
-
-          {/* Google Sign-Up */}
-          <div className="mb-4">
-            <GoogleSignInButton
-              onSuccess={handleGoogleSignup}
-              onError={(err) => setError(err)}
-              text="signup_with"
-            />
-          </div>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-4 text-gray-400">or sign up with email</span>
-            </div>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-4 py-3">
+                {error}
+              </div>
+            )}
 
             <Input
               label="Full Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={
-                role === "student" ? "Jane Doe" : "Acme Studios"
-              }
+              placeholder={role === "student" ? "Jane Doe" : "Acme Studios"}
               required
-            />
-
-            <Input
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@school.edu"
-              required
-              autoComplete="email"
-            />
-
-            <Input
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
-              required
-              autoComplete="new-password"
             />
 
             {role === "student" && (
@@ -253,33 +177,11 @@ function SignupForm() {
             )}
 
             <Button type="submit" fullWidth loading={loading} size="lg">
-              Create Account
+              Get Started
             </Button>
-
-            <p className="text-xs text-gray-500 text-center">
-              By signing up you agree to our Terms of Service and Privacy Policy.
-            </p>
           </form>
         </div>
-
-        <p className="text-center text-sm text-gray-500 mt-6">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="text-indigo-600 font-semibold hover:text-indigo-700"
-          >
-            Sign in
-          </Link>
-        </p>
       </div>
     </div>
-  );
-}
-
-export default function SignupPage() {
-  return (
-    <Suspense>
-      <SignupForm />
-    </Suspense>
   );
 }

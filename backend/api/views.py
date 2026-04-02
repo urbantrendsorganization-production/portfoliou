@@ -1,16 +1,74 @@
 from django.db import models
 from rest_framework import viewsets, permissions, status, generics
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes as drf_permission_classes
+from rest_framework.permissions import IsAdminUser
 from django.contrib.auth.models import User
 from .models import Profile, WorkSample, Gig, GigApplication, Message, Bookmark, Analytics, Notification, Subscription
 from .serializers import (
     UserSerializer, RegisterSerializer, ProfileSerializer,
     WorkSampleSerializer, GigSerializer, GigApplicationSerializer,
     MessageSerializer, BookmarkSerializer, AnalyticsSerializer,
-    NotificationSerializer, SubscriptionSerializer
+    NotificationSerializer, SubscriptionSerializer,
+    AdminProfileSerializer, AdminGigSerializer, AdminWorkSampleSerializer,
 )
 from django.db.models import Count, Q
+from django.conf import settings
+import uuid
+
+
+class GoogleAuthView(generics.GenericAPIView):
+    """Verify a Google ID token and return JWT tokens."""
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request):
+        from google.oauth2 import id_token
+        from google.auth.transport import requests as google_requests
+
+        token = request.data.get('token')
+        if not token:
+            return Response({'error': 'Google token is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                token,
+                google_requests.Request(),
+                settings.GOOGLE_CLIENT_ID,
+            )
+        except ValueError:
+            return Response({'error': 'Invalid Google token.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        email = idinfo.get('email')
+        name = idinfo.get('name', '')
+        picture = idinfo.get('picture', '')
+
+        if not email:
+            return Response({'error': 'Email not available from Google.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Find or create user
+        user, created = User.objects.get_or_create(
+            username=email,
+            defaults={'email': email, 'first_name': name.split()[0] if name else ''},
+        )
+
+        if created:
+            user.set_unusable_password()
+            user.save()
+            # Profile is auto-created by signal; update name + avatar URL
+            profile = user.profile
+            profile.name = name
+            profile.save()
+
+        # Generate JWT tokens
+        from rest_framework_simplejwt.tokens import RefreshToken
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'is_new_user': created,
+        })
+
 
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -266,3 +324,146 @@ class AnalyticsViewSet(viewsets.ModelViewSet):
         if self.request.user.is_authenticated:
             return self.queryset.filter(profile__user=self.request.user)
         return self.queryset.none()
+
+
+# ══════════════════════════════════════════════════════════════
+# Admin API Views
+# ══════════════════════════════════════════════════════════════
+
+@api_view(['GET'])
+@drf_permission_classes([IsAdminUser])
+def admin_stats(request):
+    """Dashboard aggregate statistics."""
+    total_users = Profile.objects.count()
+    students = Profile.objects.filter(role='student').count()
+    clients = Profile.objects.filter(role='client').count()
+    total_gigs = Gig.objects.count()
+    active_gigs = Gig.objects.filter(status='open').count()
+    total_applications = GigApplication.objects.count()
+    premium_users = Profile.objects.filter(is_premium=True).count()
+    total_work_samples = WorkSample.objects.count()
+    active_subscriptions = Subscription.objects.filter(status='active').count()
+    total_messages = Message.objects.count()
+
+    return Response({
+        'total_users': total_users,
+        'students': students,
+        'clients': clients,
+        'total_gigs': total_gigs,
+        'active_gigs': active_gigs,
+        'total_applications': total_applications,
+        'premium_users': premium_users,
+        'total_work_samples': total_work_samples,
+        'active_subscriptions': active_subscriptions,
+        'total_messages': total_messages,
+    })
+
+
+class AdminUserViewSet(viewsets.ModelViewSet):
+    """Admin: manage all user profiles."""
+    queryset = Profile.objects.select_related('user').all()
+    serializer_class = AdminProfileSerializer
+    permission_classes = [IsAdminUser]
+    http_method_names = ['get', 'patch', 'delete']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        search = self.request.query_params.get('search')
+        role = self.request.query_params.get('role')
+        discipline = self.request.query_params.get('discipline')
+        premium = self.request.query_params.get('premium')
+
+        if search:
+            qs = qs.filter(
+                Q(name__icontains=search) |
+                Q(username__icontains=search) |
+                Q(user__email__icontains=search)
+            )
+        if role:
+            qs = qs.filter(role=role)
+        if discipline:
+            qs = qs.filter(discipline=discipline)
+        if premium is not None and premium != '':
+            qs = qs.filter(is_premium=premium.lower() in ('true', '1'))
+
+        return qs.order_by('-created_at')
+
+    def perform_update(self, serializer):
+        # Allow toggling is_premium and role via PATCH
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        # Delete the Django User, which cascades to Profile
+        instance.user.delete()
+
+
+class AdminGigViewSet(viewsets.ModelViewSet):
+    """Admin: manage all gigs."""
+    queryset = Gig.objects.select_related('client_profile').annotate(
+        applications_count=Count('applications')
+    ).all()
+    serializer_class = AdminGigSerializer
+    permission_classes = [IsAdminUser]
+    http_method_names = ['get', 'delete']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        status_filter = self.request.query_params.get('status')
+        discipline = self.request.query_params.get('discipline')
+        search = self.request.query_params.get('search')
+
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        if discipline:
+            qs = qs.filter(discipline=discipline)
+        if search:
+            qs = qs.filter(
+                Q(title__icontains=search) |
+                Q(client_profile__name__icontains=search)
+            )
+        return qs.order_by('-created_at')
+
+
+class AdminWorkSampleViewSet(viewsets.ModelViewSet):
+    """Admin: manage all work samples."""
+    queryset = WorkSample.objects.select_related('profile').all()
+    serializer_class = AdminWorkSampleSerializer
+    permission_classes = [IsAdminUser]
+    http_method_names = ['get', 'delete']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        search = self.request.query_params.get('search')
+        sample_type = self.request.query_params.get('type')
+
+        if search:
+            qs = qs.filter(
+                Q(title__icontains=search) |
+                Q(profile__name__icontains=search)
+            )
+        if sample_type:
+            qs = qs.filter(sample_type=sample_type)
+        return qs.order_by('-created_at')
+
+
+@api_view(['GET'])
+@drf_permission_classes([IsAdminUser])
+def admin_activity(request):
+    """Recent activity across all users (last 50 notifications)."""
+    notifications = Notification.objects.select_related('profile', 'profile__user').order_by('-created_at')[:50]
+    data = [
+        {
+            'id': n.id,
+            'notification_type': n.notification_type,
+            'title': n.title,
+            'message': n.message,
+            'link': n.link,
+            'read': n.read,
+            'metadata': n.metadata,
+            'created_at': n.created_at.isoformat(),
+            'profile_name': n.profile.name,
+            'profile_username': n.profile.username,
+        }
+        for n in notifications
+    ]
+    return Response(data)

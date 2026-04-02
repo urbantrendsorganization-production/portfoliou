@@ -24,6 +24,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class ProfileSerializer(serializers.ModelSerializer):
     user_username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
+    is_staff = serializers.BooleanField(source='user.is_staff', read_only=True)
     avatar_url = serializers.SerializerMethodField()
     cover_image_url = serializers.SerializerMethodField()
 
@@ -133,3 +134,75 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subscription
         fields = '__all__'
+
+
+# ── Admin Serializers ────────────────────────────────────────
+
+class AdminProfileSerializer(serializers.ModelSerializer):
+    user_username = serializers.CharField(source='user.username', read_only=True)
+    email = serializers.EmailField(source='user.email', read_only=True)
+    is_staff = serializers.BooleanField(source='user.is_staff', read_only=True)
+    avatar_url = serializers.SerializerMethodField()
+    date_joined = serializers.DateTimeField(source='user.date_joined', read_only=True)
+
+    class Meta:
+        model = Profile
+        fields = [
+            'id', 'user', 'user_username', 'email', 'is_staff', 'role', 'name',
+            'username', 'school', 'discipline', 'bio', 'avatar', 'avatar_url',
+            'skills', 'location', 'is_premium', 'open_to_work',
+            'created_at', 'updated_at', 'date_joined',
+        ]
+
+    def get_avatar_url(self, obj):
+        if obj.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+            return obj.avatar.url
+        return None
+
+
+class AdminGigSerializer(serializers.ModelSerializer):
+    client_name = serializers.CharField(source='client_profile.name', read_only=True)
+    client_username = serializers.CharField(source='client_profile.username', read_only=True)
+    applications_count = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        model = Gig
+        fields = [
+            'id', 'client_profile', 'client_name', 'client_username',
+            'title', 'description', 'discipline', 'budget', 'deadline',
+            'status', 'applications_count', 'created_at',
+        ]
+
+
+class AdminWorkSampleSerializer(serializers.ModelSerializer):
+    owner_name = serializers.CharField(source='profile.name', read_only=True)
+    owner_username = serializers.CharField(source='profile.username', read_only=True)
+    media_url = serializers.SerializerMethodField()
+    thumbnail_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = WorkSample
+        fields = [
+            'id', 'profile', 'owner_name', 'owner_username',
+            'title', 'description', 'sample_type', 'media', 'media_url',
+            'link', 'thumbnail', 'thumbnail_url', 'tags', 'created_at',
+        ]
+
+    def get_media_url(self, obj):
+        if obj.media:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.media.url)
+            return obj.media.url
+        return None
+
+    def get_thumbnail_url(self, obj):
+        if obj.thumbnail:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.thumbnail.url)
+            return obj.thumbnail.url
+        return None

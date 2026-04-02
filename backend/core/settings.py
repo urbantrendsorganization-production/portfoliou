@@ -12,6 +12,7 @@ env = environ.Env(
     REDIS_URL=(str, 'redis://localhost:6379/0'),
     CORS_ALLOWED_ORIGINS=(list, []),
     INTERNAL_API_KEY=(str, ''),
+    GOOGLE_CLIENT_ID=(str, ''),
 )
 
 environ.Env.read_env(BASE_DIR / '.env', overrides=False)
@@ -154,6 +155,9 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Internal API key for Stripe webhook -> Django calls
 INTERNAL_API_KEY = env('INTERNAL_API_KEY')
+
+# Google OAuth
+GOOGLE_CLIENT_ID = env('GOOGLE_CLIENT_ID')
 
 # Security headers for production
 if not DEBUG:

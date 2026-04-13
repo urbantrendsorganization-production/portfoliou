@@ -14,7 +14,7 @@ export function ViewTracker({ profileId }: { profileId: number }) {
           referrer: document.referrer,
           path: window.location.pathname,
         },
-      }).catch(err => console.error("Tracking error:", err));
+      }).catch(() => { /* analytics unavailable — silently ignore */ });
     }, 3000);
 
     return () => clearTimeout(timer);

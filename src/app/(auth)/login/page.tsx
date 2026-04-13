@@ -29,14 +29,7 @@ function LoginForm() {
       const data = await api.auth.googleLogin(credential);
       const profile = await api.auth.me();
       setProfile(profile);
-
-      // If new user, send them to complete their profile
-      if (data.is_new_user) {
-        router.push("/onboarding");
-      } else {
-        router.push(redirect);
-      }
-      router.refresh();
+      router.push(data.is_new_user ? "/onboarding" : redirect);
     } catch (err: any) {
       setError(err.error || "Google sign-in failed. Please try again.");
     } finally {
@@ -48,19 +41,11 @@ function LoginForm() {
     e.preventDefault();
     setError("");
     setLoading(true);
-
     try {
-      // In Django, we typically log in with username or email.
-      // Our Register logic uses email as username if we wanted, but DRF SimpleJWT defaults to username.
-      // Let's assume username is the email for this implementation or update backend.
-      // For now, let's use the email as the 'username' key for simplicity.
       await api.auth.login({ username: email, password });
-
       const profile = await api.auth.me();
       setProfile(profile);
-
       router.push(redirect);
-      router.refresh();
     } catch (err: any) {
       setError(err.detail || "Invalid email or password.");
     } finally {
@@ -119,8 +104,8 @@ function LoginForm() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
-              label="Username (Email)"
-              type="text"
+              label="Email"
+              type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@school.edu"
@@ -137,6 +122,18 @@ function LoginForm() {
               required
               autoComplete="current-password"
             />
+
+            <div className="flex justify-end">
+              <span className="text-xs text-gray-400 dark:text-gray-500">
+                Forgot your password?{" "}
+                <Link
+                  href="/contact"
+                  className="text-indigo-600 dark:text-indigo-400 hover:underline"
+                >
+                  Contact support
+                </Link>
+              </span>
+            </div>
 
             <Button type="submit" fullWidth loading={loading} size="lg">
               Sign In
@@ -160,7 +157,13 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+        </div>
+      }
+    >
       <LoginForm />
     </Suspense>
   );

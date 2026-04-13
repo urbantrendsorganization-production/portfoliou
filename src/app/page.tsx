@@ -96,10 +96,10 @@ const features = [
 ];
 
 const stats = [
-  { value: "10,000+", label: "Student Portfolios" },
-  { value: "2,500+", label: "Gigs Posted" },
-  { value: "500+", label: "Businesses" },
-  { value: "95%", label: "Satisfaction Rate" },
+  { value: "Nairobi", label: "Launching 2026" },
+  { value: "4", label: "Creative Disciplines" },
+  { value: "Free", label: "To Join — Always" },
+  { value: "Beta", label: "Now Open" },
 ];
 
 export default function LandingPage() {

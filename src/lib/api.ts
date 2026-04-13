@@ -23,8 +23,8 @@ async function refreshToken() {
       localStorage.setItem('access_token', data.access);
       return data.access;
     }
-  } catch (error) {
-    console.error('Token refresh failed:', error);
+  } catch {
+    // Network error — backend unreachable; swallow silently
   }
 
   localStorage.removeItem('access_token');
@@ -58,7 +58,14 @@ async function apiRequest(endpoint: string, options: RequestOptions = {}) {
     }
   }
 
-  let response = await fetch(fullUrl, fetchOptions);
+  let response: Response;
+  try {
+    response = await fetch(fullUrl, fetchOptions);
+  } catch (networkErr: any) {
+    // Normalise network errors (TypeError: Failed to fetch, CORS, etc.)
+    // into a plain Error so they don't trigger the Next.js error overlay.
+    throw new Error(networkErr?.message ?? 'Failed to fetch');
+  }
 
   // Handle Token Expired
   if (response.status === 401 && accessToken) {

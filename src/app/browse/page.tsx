@@ -26,6 +26,8 @@ import { useEffect, useState } from "react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 const BACKEND_BASE = API_URL.replace(/\/api\/?$/, "");
 
+import { SEED_PROFILES } from "@/utils/seed-data";
+
 function resolveImageUrl(src: string | null | undefined): string | null {
   if (!src) return null;
   if (src.startsWith("http://") || src.startsWith("https://")) return src;
@@ -100,13 +102,30 @@ export default function BrowsePage() {
   async function loadTalents() {
     setLoading(true);
     try {
-      const data = await api.profiles.list({
+      const fetchPromise = api.profiles.list({
         role: "student",
         discipline: discipline || undefined,
       });
-      setTalents(data);
-    } catch (err) {
-      console.error("Error loading talents:", err);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), 6000)
+      );
+      const data = await Promise.race([fetchPromise, timeoutPromise]) as any[];
+      const filtered = discipline
+        ? data.filter((p: any) => p.discipline === discipline)
+        : data;
+      if (filtered.length > 0) {
+        setTalents(filtered);
+      } else {
+        const seeds = discipline
+          ? SEED_PROFILES.filter((p) => p.discipline === discipline)
+          : SEED_PROFILES;
+        setTalents(seeds);
+      }
+    } catch {
+      const seeds = discipline
+        ? SEED_PROFILES.filter((p) => p.discipline === discipline)
+        : SEED_PROFILES;
+      setTalents(seeds);
     } finally {
       setLoading(false);
     }
@@ -195,10 +214,10 @@ export default function BrowsePage() {
               <Search className="h-8 w-8 text-gray-300 dark:text-gray-500" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              No talent found
+              No creatives found in this category yet
             </h3>
             <p className="text-gray-500 dark:text-gray-400 mt-2">
-              Try adjusting your filters or search terms.
+              Try a different discipline or clear your search.
             </p>
           </div>
         ) : (

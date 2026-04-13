@@ -11,6 +11,7 @@ import { Select } from "@/components/ui/select";
 import { DISCIPLINES } from "@/utils/constants";
 import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 import {
   Briefcase,
   Calendar,
@@ -31,6 +32,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+
+import { SEED_GIGS } from "@/utils/seed-data";
 
 type AppFilter = "all" | "pending" | "accepted" | "rejected";
 
@@ -62,6 +65,10 @@ export default function GigsPage() {
   const [myApplications, setMyApplications] = useState<GigApplication[]>([]);
   const [appFilter, setAppFilter] = useState<AppFilter>("all");
 
+  // Gig search / discipline filter
+  const [gigSearch, setGigSearch] = useState("");
+  const [gigDiscipline, setGigDiscipline] = useState("");
+
   const [newGig, setNewGig] = useState({
     title: "",
     description: "",
@@ -70,6 +77,7 @@ export default function GigsPage() {
     deadline: "",
   });
 
+  const router = useRouter();
   const isClient = profile?.role === "client";
   const isStudent = profile?.role === "student";
 
@@ -86,15 +94,21 @@ export default function GigsPage() {
   async function loadGigs() {
     setLoading(true);
     try {
-      const data = await api.gigs.list({ status: "open" });
-      if (isClient && profile) {
+      const fetchPromise = api.gigs.list({ status: "open" });
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), 6000)
+      );
+      const data = await Promise.race([fetchPromise, timeoutPromise]) as any[];
+      if (data.length === 0) {
+        setGigs(SEED_GIGS);
+      } else if (isClient && profile) {
         setMyGigs(data.filter((g: any) => g.client_profile === profile.id));
         setGigs(data.filter((g: any) => g.client_profile !== profile.id));
       } else {
         setGigs(data);
       }
-    } catch (err) {
-      console.error("Error loading gigs:", err);
+    } catch {
+      setGigs(SEED_GIGS);
     } finally {
       setLoading(false);
     }
@@ -523,11 +537,15 @@ export default function GigsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search gigs..."
+                value={gigSearch}
+                onChange={(e) => setGigSearch(e.target.value)}
+                placeholder="Search gigs by title, discipline, or business..."
                 className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-indigo-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
             <Select
+              value={gigDiscipline}
+              onChange={(e) => setGigDiscipline(e.target.value)}
               options={[
                 { value: "", label: "All Disciplines" },
                 ...DISCIPLINES.map((d) => ({ value: d, label: d })),
@@ -537,19 +555,48 @@ export default function GigsPage() {
         )}
 
         {/* Gig List (all gigs for students, other gigs for clients) */}
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-10 w-10 animate-spin text-gray-300" />
-          </div>
-        ) : gigs.length === 0 && (!isClient || myGigs.length === 0) ? (
-          <Card className="p-20 text-center">
-            <Briefcase className="h-12 w-12 text-gray-200 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-gray-900">No active gigs found</h3>
-            <p className="text-gray-500">Check back later for new opportunities.</p>
-          </Card>
-        ) : (
+        {(() => {
+          const visibleGigs = gigs.filter((g) => {
+            const matchesDiscipline = !gigDiscipline || g.discipline === gigDiscipline;
+            const q = gigSearch.toLowerCase();
+            const matchesSearch =
+              !q ||
+              g.title?.toLowerCase().includes(q) ||
+              g.discipline?.toLowerCase().includes(q) ||
+              g.client_name?.toLowerCase().includes(q) ||
+              g.description?.toLowerCase().includes(q);
+            return matchesDiscipline && matchesSearch;
+          });
+
+          if (loading) return (
+            <div className="flex justify-center py-20">
+              <Loader2 className="h-10 w-10 animate-spin text-gray-300" />
+            </div>
+          );
+
+          if (gigs.length === 0 && (!isClient || myGigs.length === 0)) return (
+            <Card className="p-20 text-center">
+              <Briefcase className="h-12 w-12 text-gray-200 dark:text-gray-700 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">No active gigs yet</h3>
+              <p className="text-gray-500 dark:text-gray-400 mt-1">Check back soon — new opportunities are posted regularly.</p>
+            </Card>
+          );
+
+          if (visibleGigs.length === 0) return (
+            <Card className="p-16 text-center">
+              <Search className="h-10 w-10 text-gray-200 dark:text-gray-700 mx-auto mb-4" />
+              <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">No gigs match your search</h3>
+              <p className="text-gray-500 dark:text-gray-400 mt-1">
+                {gigDiscipline
+                  ? `No ${gigDiscipline} gigs posted yet — try a different discipline.`
+                  : "Try different keywords or clear your search."}
+              </p>
+            </Card>
+          );
+
+          return (
           <div className="grid gap-4">
-            {gigs.map((gig) => (
+            {visibleGigs.map((gig) => (
               <Card key={gig.id} className="p-6 hover:border-indigo-200 transition-colors">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                   <div className="space-y-3">
@@ -581,14 +628,23 @@ export default function GigsPage() {
                           <CheckCircle className="h-4 w-4" /> Applied
                         </Button>
                       ) : (
-                        <Button onClick={() => setApplyingTo(gig.id)}>Apply Now</Button>
+                        <Button
+                          onClick={() =>
+                            profile
+                              ? setApplyingTo(gig.id)
+                              : router.push("/login?redirect=/gigs")
+                          }
+                        >
+                          Apply Now
+                        </Button>
                       ))}
                   </div>
                 </div>
               </Card>
             ))}
           </div>
-        )}
+          );
+        })()}
       </div>
 
       {/* Post Gig Modal */}

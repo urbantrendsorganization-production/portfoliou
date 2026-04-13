@@ -30,17 +30,20 @@ export function GoogleSignInButton({
   text = "signin_with",
 }: GoogleSignInButtonProps) {
   const buttonRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
   const [scriptLoaded, setScriptLoaded] = useState(false);
 
   useEffect(() => {
-    if (!GOOGLE_CLIENT_ID) {
-      console.warn("NEXT_PUBLIC_GOOGLE_CLIENT_ID is not set");
+    if (!GOOGLE_CLIENT_ID) return;
+
+    // Script already loaded by a prior mount of this component
+    if (window.google?.accounts) {
+      setScriptLoaded(true);
       return;
     }
 
-    // Check if script is already loaded
-    if (window.google?.accounts) {
-      setScriptLoaded(true);
+    // Avoid injecting the script twice if it's already in the DOM
+    if (document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
       return;
     }
 
@@ -51,14 +54,13 @@ export function GoogleSignInButton({
     script.onload = () => setScriptLoaded(true);
     script.onerror = () => onError?.("Failed to load Google Sign-In");
     document.head.appendChild(script);
-
-    return () => {
-      // Don't remove the script on cleanup — it may be needed by other components
-    };
   }, []);
 
   useEffect(() => {
     if (!scriptLoaded || !buttonRef.current || !GOOGLE_CLIENT_ID) return;
+    // Prevent calling initialize() more than once per component lifecycle
+    if (initializedRef.current) return;
+    initializedRef.current = true;
 
     try {
       window.google!.accounts.id.initialize({
@@ -72,18 +74,21 @@ export function GoogleSignInButton({
         },
       });
 
+      // Google SDK requires an integer pixel width — percentages are invalid
+      const containerWidth = buttonRef.current.offsetWidth || 400;
+
       window.google!.accounts.id.renderButton(buttonRef.current, {
         type: "standard",
         theme: "outline",
         size: "large",
         text,
-        width: "100%",
+        width: containerWidth,
         logo_alignment: "left",
       });
-    } catch (err) {
+    } catch {
       onError?.("Failed to initialize Google Sign-In");
     }
-  }, [scriptLoaded, onSuccess, onError, text]);
+  }, [scriptLoaded]);
 
   if (!GOOGLE_CLIENT_ID) {
     return null;

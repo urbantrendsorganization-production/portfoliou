@@ -25,6 +25,7 @@ function SignupForm() {
   const [password, setPassword] = useState("");
   const [discipline, setDiscipline] = useState("");
   const [school, setSchool] = useState("");
+  const [industry, setIndustry] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -39,10 +40,8 @@ function SignupForm() {
       const data = await api.auth.googleLogin(credential);
       const profile = await api.auth.me();
       setProfile(profile);
-
-      // Always send to onboarding to pick role
-      router.push("/onboarding");
-      router.refresh();
+      // New users go to onboarding to pick role; returning users go straight to dashboard
+      router.push(data.is_new_user ? "/onboarding" : "/dashboard");
     } catch (err: any) {
       setError(err.error || "Google sign-up failed. Please try again.");
     } finally {
@@ -62,31 +61,21 @@ function SignupForm() {
     setLoading(true);
 
     try {
-      // 1. Register user (using email as username)
-      await api.auth.register({ 
-        username: email, 
-        email, 
-        password 
-      });
-
-      // 2. Login
+      await api.auth.register({ username: email, email, password });
       await api.auth.login({ username: email, password });
 
-      // 3. Update profile with role-specific data
       const me = await api.profiles.me();
       const updatedProfile = await api.profiles.update(me.id, {
         role,
         name,
         discipline: role === "student" ? discipline : "",
         school: role === "student" ? school : "",
+        bio: role === "client" && industry ? `Industry: ${industry}` : "",
       });
 
       setProfile(updatedProfile);
-      
       router.push("/dashboard");
-      router.refresh();
     } catch (err: any) {
-      console.error("Signup error:", err);
       const msg =
         err.username?.[0] ||
         err.email?.[0] ||
@@ -208,12 +197,10 @@ function SignupForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
 
             <Input
-              label="Full Name"
+              label={role === "client" ? "Company Name" : "Full Name"}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={
-                role === "student" ? "Jane Doe" : "Acme Studios"
-              }
+              placeholder={role === "student" ? "e.g., Amara Diallo" : "e.g., Vivid Collective"}
               required
             />
 
@@ -222,7 +209,7 @@ function SignupForm() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@school.edu"
+              placeholder={role === "student" ? "you@university.edu" : "hello@company.com"}
               required
               autoComplete="email"
             />
@@ -247,20 +234,37 @@ function SignupForm() {
                   placeholder="Select your discipline"
                 />
                 <Input
-                  label="School"
+                  label="University / Institution"
                   value={school}
                   onChange={(e) => setSchool(e.target.value)}
-                  placeholder="e.g., Howard University"
+                  placeholder="e.g., University of Nairobi"
                 />
               </>
+            )}
+
+            {role === "client" && (
+              <Input
+                label="Industry"
+                value={industry}
+                onChange={(e) => setIndustry(e.target.value)}
+                placeholder="e.g., Fashion, Technology, Marketing"
+              />
             )}
 
             <Button type="submit" fullWidth loading={loading} size="lg">
               Create Account
             </Button>
 
-            <p className="text-xs text-gray-500 text-center">
-              By signing up you agree to our Terms of Service and Privacy Policy.
+            <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+              By signing up you agree to our{" "}
+              <Link href="/terms" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="/privacy" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+                Privacy Policy
+              </Link>
+              .
             </p>
           </form>
         </div>
@@ -281,7 +285,13 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <Suspense>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+        </div>
+      }
+    >
       <SignupForm />
     </Suspense>
   );

@@ -173,18 +173,52 @@ export default function SettingsPage() {
     }
   }
 
+  /** Resize and compress an image file using canvas before upload.
+   *  Keeps the file well under the server's 10 MB limit. */
+  async function compressImage(
+    file: File,
+    maxDimension: number,
+    quality = 0.82
+  ): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const { naturalWidth: w, naturalHeight: h } = img;
+        const scale = Math.min(1, maxDimension / Math.max(w, h));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(w * scale);
+        canvas.height = Math.round(h * scale);
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) { reject(new Error("Compression failed")); return; }
+            resolve(new File([blob], file.name, { type: "image/jpeg" }));
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+      img.onerror = reject;
+      img.src = url;
+    });
+  }
+
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !profile) return;
 
     setUploading(true);
     try {
+      const compressed = await compressImage(file, 800);
       const data = new FormData();
-      data.append("avatar", file);
+      data.append("avatar", compressed);
       const updatedProfile = await api.profiles.update(profile.id, data, true);
       setProfile(updatedProfile);
-    } catch (err) {
-      console.error("Error uploading avatar:", err);
+    } catch {
+      // silently ignore upload errors — user can retry
     } finally {
       setUploading(false);
     }
@@ -198,12 +232,13 @@ export default function SettingsPage() {
 
     setUploadingCover(true);
     try {
+      const compressed = await compressImage(file, 1600);
       const data = new FormData();
-      data.append("cover_image", file);
+      data.append("cover_image", compressed);
       const updatedProfile = await api.profiles.update(profile.id, data, true);
       setProfile(updatedProfile);
-    } catch (err) {
-      console.error("Error uploading cover image:", err);
+    } catch {
+      // silently ignore upload errors — user can retry
     } finally {
       setUploadingCover(false);
     }

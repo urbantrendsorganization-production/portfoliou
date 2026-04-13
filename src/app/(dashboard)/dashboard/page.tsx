@@ -314,6 +314,19 @@ export default function DashboardPage() {
 
         {/* ── Hero Welcome Banner ── */}
         <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 dark:from-indigo-700 dark:via-indigo-800 dark:to-purple-900 p-6 sm:p-8 shadow-lg shadow-indigo-200/40 dark:shadow-indigo-900/40">
+          {/* Background image layer */}
+          <div className="absolute inset-0 pointer-events-none">
+            <img
+              src={
+                isStudent
+                  ? "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=1200&h=400&fit=crop"
+                  : "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1200&h=400&fit=crop"
+              }
+              alt=""
+              aria-hidden="true"
+              className="w-full h-full object-cover opacity-10"
+            />
+          </div>
           {/* Decorative background elements */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute -top-12 -right-12 h-48 w-48 rounded-full bg-white/5" />

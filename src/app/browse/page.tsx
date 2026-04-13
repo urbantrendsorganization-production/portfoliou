@@ -28,6 +28,17 @@ const BACKEND_BASE = API_URL.replace(/\/api\/?$/, "");
 
 import { SEED_PROFILES } from "@/utils/seed-data";
 
+const DISCIPLINE_COVER_IMAGES: Record<string, string> = {
+  "Beauty & Cosmetology":
+    "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&h=300&fit=crop",
+  "Web/App Development":
+    "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=300&fit=crop",
+  "Graphic Design":
+    "https://images.unsplash.com/photo-1626785774573-4b799315345d?w=600&h=300&fit=crop",
+  "Fashion & Styling":
+    "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=600&h=300&fit=crop",
+};
+
 function resolveImageUrl(src: string | null | undefined): string | null {
   if (!src) return null;
   if (src.startsWith("http://") || src.startsWith("https://")) return src;
@@ -141,20 +152,30 @@ export default function BrowsePage() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-3 flex items-center gap-3">
-            Discover Student Talent{" "}
-            <Sparkles className="h-6 w-6 text-amber-500" />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20">
+      {/* Hero banner */}
+      <div className="relative h-56 sm:h-64 overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=1600&h=500&fit=crop"
+          alt="Creative talent"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-900/80 via-indigo-800/70 to-purple-900/60" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+          <div className="inline-flex items-center gap-2 bg-white/15 border border-white/25 rounded-full px-4 py-1.5 text-white text-xs font-semibold mb-4 backdrop-blur-sm">
+            <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+            Nairobi College Talent
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">
+            Discover Creative Talent
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl">
-            Browse and connect with the best college creatives in beauty, tech,
-            design, and fashion.
+          <p className="text-indigo-100 text-base max-w-xl">
+            Browse portfolios from the best college creatives in beauty, tech, design, and fashion.
           </p>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         {/* Filters */}
         <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8 flex flex-col md:flex-row gap-4">
           <div className="flex-1 relative">
@@ -234,7 +255,7 @@ export default function BrowsePage() {
                   href={`/${talent.username && talent.username.trim() ? talent.username : talent.user_username}`}
                 >
                   <Card className="h-full overflow-hidden hover:shadow-xl dark:hover:shadow-black/40 hover:-translate-y-1 transition-all duration-300 group bg-white dark:bg-gray-800">
-                    {/* Cover Image / Gradient Banner */}
+                    {/* Cover Image / Discipline Banner */}
                     <div className="h-36 relative overflow-hidden">
                       {coverUrl ? (
                         <img
@@ -242,6 +263,15 @@ export default function BrowsePage() {
                           alt={`${talent.name} cover`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
+                      ) : DISCIPLINE_COVER_IMAGES[talent.discipline] ? (
+                        <>
+                          <img
+                            src={DISCIPLINE_COVER_IMAGES[talent.discipline]}
+                            alt={talent.discipline}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80"
+                          />
+                          <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-50`} />
+                        </>
                       ) : (
                         <div
                           className={`w-full h-full bg-gradient-to-br ${gradient}`}

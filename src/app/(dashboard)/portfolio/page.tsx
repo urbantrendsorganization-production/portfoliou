@@ -246,9 +246,20 @@ export default function PortfolioPage() {
                 <Loader2 className="h-8 w-8 animate-spin text-gray-300 dark:text-gray-600" />
               </div>
             ) : samples.length === 0 ? (
-              <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
-                <ImageIcon className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-500 dark:text-gray-400">No work samples added yet.</p>
+              <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+                <img
+                  src="https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=900&h=300&fit=crop"
+                  alt=""
+                  aria-hidden="true"
+                  className="w-full h-48 object-cover opacity-20 dark:opacity-10"
+                />
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
+                  <ImageIcon className="h-10 w-10 text-gray-400 dark:text-gray-500 mb-3" />
+                  <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Your portfolio is empty</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-xs">
+                    Upload images, add links, or embed videos to showcase your creative work.
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 gap-4">

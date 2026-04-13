@@ -10,17 +10,31 @@ import { DISCIPLINES } from "@/utils/constants";
 import { cn } from "@/utils/helpers";
 import { Users, Briefcase } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
 import type { Role } from "@/types/database";
 
-export default function OnboardingPage() {
+function slugify(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s_]/g, "")
+    .replace(/\s+/g, "_")
+    .slice(0, 30);
+}
+
+function OnboardingForm() {
+  const searchParams = useSearchParams();
+  const initialRole = (searchParams.get("role") as Role) || "student";
+
   const profile = useAppStore((s) => s.profile);
   const setProfile = useAppStore((s) => s.setProfile);
   const router = useRouter();
 
-  const [role, setRole] = useState<Role>("student");
+  const [role, setRole] = useState<Role>(initialRole);
   const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [usernameEdited, setUsernameEdited] = useState(false);
   const [discipline, setDiscipline] = useState("");
   const [school, setSchool] = useState("");
   const [error, setError] = useState("");
@@ -30,11 +44,20 @@ export default function OnboardingPage() {
   useEffect(() => {
     if (profile) {
       setName(profile.name || "");
+      if (!usernameEdited) {
+        setUsername(profile.username || slugify(profile.name || ""));
+      }
     }
   }, [profile]);
 
+  // Auto-fill username from name while user hasn't manually edited it
   useEffect(() => {
-    // If no token, redirect to login
+    if (!usernameEdited && name) {
+      setUsername(slugify(name));
+    }
+  }, [name, usernameEdited]);
+
+  useEffect(() => {
     if (!localStorage.getItem("access_token")) {
       router.replace("/login");
     }
@@ -49,12 +72,23 @@ export default function OnboardingPage() {
       return;
     }
 
+    if (!username.trim()) {
+      setError("Please choose a username.");
+      return;
+    }
+
+    if (!/^[a-z0-9_]{3,30}$/.test(username)) {
+      setError("Username must be 3–30 characters: lowercase letters, numbers, or underscores only.");
+      return;
+    }
+
     setLoading(true);
     try {
       const me = profile || (await api.profiles.me());
       const updatedProfile = await api.profiles.update(me.id, {
         role,
         name: name.trim(),
+        username: username.trim(),
         discipline: role === "student" ? discipline : "",
         school: role === "student" ? school : "",
       });
@@ -62,8 +96,12 @@ export default function OnboardingPage() {
       router.push("/dashboard");
       router.refresh();
     } catch (err: any) {
-      console.error("Onboarding error:", err);
-      setError("Something went wrong. Please try again.");
+      const msg =
+        err.username?.[0] ||
+        err.detail ||
+        err.error ||
+        "Something went wrong. Please try again.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -157,12 +195,31 @@ export default function OnboardingPage() {
             )}
 
             <Input
-              label="Full Name"
+              label={role === "client" ? "Company / Brand Name" : "Full Name"}
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={role === "student" ? "Jane Doe" : "Acme Studios"}
               required
             />
+
+            <div>
+              <Input
+                label="Username"
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""));
+                  setUsernameEdited(true);
+                }}
+                placeholder="e.g., jane_doe"
+                required
+              />
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1 pl-1">
+                Your public profile URL will be{" "}
+                <span className="font-semibold text-indigo-500">
+                  portfoliou.dev/{username || "your_username"}
+                </span>
+              </p>
+            </div>
 
             {role === "student" && (
               <>
@@ -189,5 +246,19 @@ export default function OnboardingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OnboardingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+        </div>
+      }
+    >
+      <OnboardingForm />
+    </Suspense>
   );
 }

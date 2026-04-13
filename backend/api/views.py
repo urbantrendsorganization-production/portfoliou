@@ -14,7 +14,38 @@ from .serializers import (
 )
 from django.db.models import Count, Q
 from django.conf import settings
+from django.utils import timezone
 import uuid
+
+VERSION = "1.0.0-beta"
+
+
+@api_view(['GET'])
+@drf_permission_classes([permissions.AllowAny])
+def health_check(request):
+    """Public health check endpoint. Returns system status and version."""
+    from django.db import connection
+    try:
+        connection.ensure_connection()
+        db_status = "healthy"
+    except Exception:
+        db_status = "unhealthy"
+
+    overall = "healthy" if db_status == "healthy" else "degraded"
+
+    return Response({
+        "status": overall,
+        "version": VERSION,
+        "services": {
+            "database": db_status,
+            "api": "healthy",
+        },
+        "counts": {
+            "users": Profile.objects.count(),
+            "gigs": Gig.objects.filter(status="open").count(),
+        },
+        "timestamp": timezone.now().isoformat(),
+    })
 
 
 class GoogleAuthView(generics.GenericAPIView):

@@ -9,6 +9,8 @@ from .views import (
     # Admin views
     admin_stats, AdminUserViewSet, AdminGigViewSet,
     AdminWorkSampleViewSet, admin_activity,
+    # Health
+    health_check,
 )
 
 router = DefaultRouter()
@@ -29,6 +31,7 @@ admin_router.register(r'gigs', AdminGigViewSet, basename='admin-gigs')
 admin_router.register(r'work-samples', AdminWorkSampleViewSet, basename='admin-work-samples')
 
 urlpatterns = [
+    path('health/', health_check, name='health-check'),
     path('auth/register/', RegisterView.as_view(), name='auth_register'),
     path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),

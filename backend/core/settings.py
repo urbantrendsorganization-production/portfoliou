@@ -163,6 +163,9 @@ INTERNAL_API_KEY = env('INTERNAL_API_KEY')
 # Google OAuth
 GOOGLE_CLIENT_ID = env('GOOGLE_CLIENT_ID')
 
+# Allow Google Sign-In popup to communicate back — must be set in all envs
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+
 # Security headers for production
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

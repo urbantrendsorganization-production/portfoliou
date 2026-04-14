@@ -5,7 +5,7 @@ from .views import (
     GoogleAuthView, RegisterView, ProfileViewSet, WorkSampleViewSet,
     GigViewSet, GigApplicationViewSet, MessageViewSet,
     AnalyticsViewSet, BookmarkViewSet, SubscriptionViewSet,
-    NotificationViewSet,
+    NotificationViewSet, CollegeViewSet,
     # Admin views
     admin_stats, AdminUserViewSet, AdminGigViewSet,
     AdminWorkSampleViewSet, admin_activity,
@@ -23,6 +23,7 @@ router.register(r'analytics', AnalyticsViewSet)
 router.register(r'bookmarks', BookmarkViewSet)
 router.register(r'subscriptions', SubscriptionViewSet)
 router.register(r'notifications', NotificationViewSet)
+router.register(r'colleges', CollegeViewSet, basename='colleges')
 
 # Admin router
 admin_router = DefaultRouter()

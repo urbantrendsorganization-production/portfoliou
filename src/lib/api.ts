@@ -248,6 +248,25 @@ export const api = {
     },
   },
 
+  // ── Colleges ──────────────────────────────
+  colleges: {
+    list: async () => {
+      const data = await apiRequest('colleges/');
+      return extractResults(data);
+    },
+    create: (body: {
+      name: string;
+      short_name?: string;
+      location?: string;
+      website?: string;
+      is_active?: boolean;
+    }) => apiRequest('colleges/', { method: 'POST', body }),
+    update: (id: number, body: any) =>
+      apiRequest(`colleges/${id}/`, { method: 'PATCH', body }),
+    delete: (id: number) =>
+      apiRequest(`colleges/${id}/`, { method: 'DELETE' }),
+  },
+
   // ── Admin ─────────────────────────────────
   admin: {
     stats: () => apiRequest('admin/stats/'),

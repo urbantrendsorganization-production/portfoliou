@@ -57,18 +57,20 @@ export const PLANS = {
   },
 } as const;
 
+export const APP_VERSION = "1.1.0";
+
 export const SKILL_SUGGESTIONS: Record<string, string[]> = {
   "Beauty & Cosmetology": [
     "Hair Styling",
     "Makeup Artistry",
-    "Nail Art",
     "Skincare",
-    "Braiding",
+    "Nail Art",
     "Color Theory",
     "Bridal Makeup",
-    "SFX Makeup",
-    "Barbering",
-    "Esthetics",
+    "Special Effects Makeup",
+    "Lash Extensions",
+    "Waxing & Threading",
+    "Salon Management",
   ],
   "Web/App Development": [
     "React",
@@ -76,34 +78,50 @@ export const SKILL_SUGGESTIONS: Record<string, string[]> = {
     "TypeScript",
     "Node.js",
     "Python",
+    "Django",
+    "REST APIs",
     "UI/UX Design",
-    "Figma",
-    "Mobile Development",
     "Database Design",
-    "API Development",
+    "Mobile Development",
+    "GraphQL",
+    "TailwindCSS",
   ],
   "Graphic Design": [
     "Adobe Photoshop",
-    "Adobe Illustrator",
-    "Figma",
-    "Branding",
-    "Typography",
+    "Illustrator",
+    "InDesign",
+    "Brand Identity",
     "Logo Design",
+    "Typography",
     "Print Design",
     "Motion Graphics",
-    "UI Design",
-    "Photography",
+    "Figma",
+    "Color Theory",
   ],
   "Fashion & Styling": [
-    "Personal Styling",
-    "Fashion Illustration",
-    "Pattern Making",
-    "Sewing",
-    "Textile Design",
-    "Wardrobe Consulting",
-    "Fashion Photography",
+    "Fashion Design",
     "Trend Forecasting",
+    "Wardrobe Styling",
+    "Textile Knowledge",
+    "Pattern Making",
+    "Fashion Photography",
+    "Retail Buying",
     "Visual Merchandising",
-    "Costume Design",
+    "Sustainable Fashion",
   ],
 };
+
+export const DEFAULT_SKILL_SUGGESTIONS: string[] = [
+  "Communication",
+  "Project Management",
+  "Problem Solving",
+  "Time Management",
+  "Teamwork",
+  "Creativity",
+  "Critical Thinking",
+];
+
+export function getSkillSuggestions(discipline?: string | null): string[] {
+  if (discipline && SKILL_SUGGESTIONS[discipline]) return SKILL_SUGGESTIONS[discipline];
+  return DEFAULT_SKILL_SUGGESTIONS;
+}

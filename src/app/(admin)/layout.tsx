@@ -10,17 +10,20 @@ import {
   Users,
   Briefcase,
   Image,
+  GraduationCap,
   ArrowLeft,
   Shield,
   Menu,
   X,
 } from "lucide-react";
+import { APP_VERSION } from "@/utils/constants";
 
 const navItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/gigs", label: "Gigs", icon: Briefcase },
   { href: "/admin/content", label: "Content", icon: Image },
+  { href: "/admin/colleges", label: "Colleges", icon: GraduationCap },
 ];
 
 export default function AdminLayout({
@@ -117,6 +120,9 @@ export default function AdminLayout({
             <ArrowLeft className="h-5 w-5 text-gray-400 dark:text-gray-500" />
             Back to App
           </Link>
+          <p className="px-3 mt-3 text-xs text-gray-400 dark:text-gray-500">
+            PortfolioU v{APP_VERSION}
+          </p>
         </div>
       </aside>
 

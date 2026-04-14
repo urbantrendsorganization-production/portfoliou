@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Profile, WorkSample, Gig, GigApplication, Message, Bookmark, Analytics, Notification, Subscription
+from .models import Profile, WorkSample, Gig, GigApplication, Message, Bookmark, Analytics, Notification, Subscription, College
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -21,16 +21,26 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return user
 
+class CollegeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = College
+        fields = '__all__'
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     user_username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
     is_staff = serializers.BooleanField(source='user.is_staff', read_only=True)
     avatar_url = serializers.SerializerMethodField()
     cover_image_url = serializers.SerializerMethodField()
+    college_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Profile
         fields = '__all__'
+
+    def get_college_name(self, obj):
+        return obj.college.name if obj.college else None
 
     def get_avatar_url(self, obj):
         if obj.avatar:
@@ -157,13 +167,14 @@ class AdminProfileSerializer(serializers.ModelSerializer):
     is_staff = serializers.BooleanField(source='user.is_staff', read_only=True)
     avatar_url = serializers.SerializerMethodField()
     date_joined = serializers.DateTimeField(source='user.date_joined', read_only=True)
+    college_name = serializers.CharField(source='college.name', read_only=True, default=None)
 
     class Meta:
         model = Profile
         fields = [
             'id', 'user', 'user_username', 'email', 'is_staff', 'role', 'name',
-            'username', 'school', 'discipline', 'bio', 'avatar', 'avatar_url',
-            'skills', 'location', 'is_premium', 'open_to_work',
+            'username', 'school', 'college', 'college_name', 'discipline', 'bio',
+            'avatar', 'avatar_url', 'skills', 'location', 'is_premium', 'open_to_work',
             'created_at', 'updated_at', 'date_joined',
         ]
 

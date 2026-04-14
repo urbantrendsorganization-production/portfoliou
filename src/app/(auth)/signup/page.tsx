@@ -9,7 +9,7 @@ import { Select } from "@/components/ui/select";
 import { DISCIPLINES } from "@/utils/constants";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Users, Briefcase } from "lucide-react";
 import { cn } from "@/utils/helpers";
 import type { Role } from "@/types/database";
@@ -25,6 +25,10 @@ function SignupForm() {
   const [password, setPassword] = useState("");
   const [discipline, setDiscipline] = useState("");
   const [school, setSchool] = useState("");
+  const [collegeId, setCollegeId] = useState<string>("");
+  const [colleges, setColleges] = useState<Array<{ id: number; name: string }>>([]);
+  const [collegesLoading, setCollegesLoading] = useState(true);
+  const [collegesLoadFailed, setCollegesLoadFailed] = useState(false);
   const [industry, setIndustry] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,6 +36,29 @@ function SignupForm() {
   const router = useRouter();
   const setProfile = useAppStore((s) => s.setProfile);
   const { theme } = useTheme();
+
+  useEffect(() => {
+    let cancelled = false;
+    async function loadColleges() {
+      try {
+        const data = await api.colleges.list();
+        if (cancelled) return;
+        const sorted = [...data].sort((a: any, b: any) =>
+          String(a.name).localeCompare(String(b.name))
+        );
+        setColleges(sorted);
+      } catch (err) {
+        console.error("Failed to load colleges:", err);
+        if (!cancelled) setCollegesLoadFailed(true);
+      } finally {
+        if (!cancelled) setCollegesLoading(false);
+      }
+    }
+    loadColleges();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleGoogleSignup(credential: string) {
     setError("");
@@ -65,13 +92,25 @@ function SignupForm() {
       await api.auth.login({ username: email, password });
 
       const me = await api.profiles.me();
-      const updatedProfile = await api.profiles.update(me.id, {
+      const profileUpdate: Record<string, unknown> = {
         role,
         name,
         discipline: role === "student" ? discipline : "",
-        school: role === "student" ? school : "",
         bio: role === "client" && industry ? `Industry: ${industry}` : "",
-      });
+      };
+      if (role === "student") {
+        const canUseCollegeFK = !collegesLoadFailed && colleges.length > 0;
+        if (canUseCollegeFK) {
+          profileUpdate.college = collegeId ? Number(collegeId) : null;
+          const selected = colleges.find((c) => String(c.id) === collegeId);
+          profileUpdate.school = selected?.name || "";
+        } else {
+          profileUpdate.school = school;
+        }
+      } else {
+        profileUpdate.school = "";
+      }
+      const updatedProfile = await api.profiles.update(me.id, profileUpdate);
 
       setProfile(updatedProfile);
       router.push("/dashboard");
@@ -233,12 +272,34 @@ function SignupForm() {
                   options={DISCIPLINES.map((d) => ({ value: d, label: d }))}
                   placeholder="Select your discipline"
                 />
-                <Input
-                  label="University / Institution"
-                  value={school}
-                  onChange={(e) => setSchool(e.target.value)}
-                  placeholder="e.g., University of Nairobi"
-                />
+                {collegesLoading ? (
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      University / Institution
+                    </label>
+                    <div className="flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-400 dark:text-gray-500">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+                      Loading colleges...
+                    </div>
+                  </div>
+                ) : !collegesLoadFailed && colleges.length > 0 ? (
+                  <Select
+                    label="University / Institution"
+                    value={collegeId}
+                    onChange={(e) => setCollegeId(e.target.value)}
+                    options={[...colleges]
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map((c) => ({ value: String(c.id), label: c.name }))}
+                    placeholder="Select your college"
+                  />
+                ) : (
+                  <Input
+                    label="University / Institution"
+                    value={school}
+                    onChange={(e) => setSchool(e.target.value)}
+                    placeholder="e.g., University of Nairobi"
+                  />
+                )}
               </>
             )}
 

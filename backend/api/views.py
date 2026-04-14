@@ -4,20 +4,21 @@ from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes as drf_permission_classes
 from rest_framework.permissions import IsAdminUser
 from django.contrib.auth.models import User
-from .models import Profile, WorkSample, Gig, GigApplication, Message, Bookmark, Analytics, Notification, Subscription
+from .models import Profile, WorkSample, Gig, GigApplication, Message, Bookmark, Analytics, Notification, Subscription, College
 from .serializers import (
     UserSerializer, RegisterSerializer, ProfileSerializer,
     WorkSampleSerializer, GigSerializer, GigApplicationSerializer,
     MessageSerializer, BookmarkSerializer, AnalyticsSerializer,
     NotificationSerializer, SubscriptionSerializer,
     AdminProfileSerializer, AdminGigSerializer, AdminWorkSampleSerializer,
+    CollegeSerializer,
 )
 from django.db.models import Count, Q
 from django.conf import settings
 from django.utils import timezone
 import uuid
 
-VERSION = "1.0.0-beta"
+VERSION = "1.1.0"
 
 
 @api_view(['GET'])
@@ -498,3 +499,20 @@ def admin_activity(request):
         for n in notifications
     ]
     return Response(data)
+
+
+class CollegeViewSet(viewsets.ModelViewSet):
+    """Colleges: public list, admin-only writes."""
+    queryset = College.objects.all()
+    serializer_class = CollegeSerializer
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        if self.action == 'list' and not (self.request.user.is_authenticated and self.request.user.is_staff):
+            qs = qs.filter(is_active=True)
+        return qs.order_by('name')
+
+    def get_permissions(self):
+        if self.action in ('list', 'retrieve'):
+            return [permissions.AllowAny()]
+        return [IsAdminUser()]

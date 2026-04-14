@@ -3,6 +3,22 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+
+class College(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    short_name = models.CharField(max_length=50, blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    website = models.URLField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
 class Profile(models.Model):
     ROLE_CHOICES = (
         ('student', 'Student'),
@@ -22,6 +38,7 @@ class Profile(models.Model):
     name = models.CharField(max_length=255, blank=True)
     username = models.CharField(max_length=100, unique=True, null=True, blank=True)
     school = models.CharField(max_length=255, blank=True)
+    college = models.ForeignKey('College', null=True, blank=True, on_delete=models.SET_NULL, related_name='students')
     discipline = models.CharField(max_length=100, choices=DISCIPLINE_CHOICES, blank=True)
     bio = models.TextField(blank=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)

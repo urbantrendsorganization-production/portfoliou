@@ -48,21 +48,34 @@ class ProfileSerializer(serializers.ModelSerializer):
             return obj.cover_image.url
         return None
 
+class FlexibleTagsField(serializers.Field):
+    """Accepts a Python list (from JSON body) or a JSON-encoded string (from multipart FormData).
+    DRF's built-in JSONField calls json.loads() on whatever it receives, which breaks when
+    the value is already a parsed list — this field handles both cases explicitly."""
+
+    def to_internal_value(self, data):
+        import json
+        if isinstance(data, list):
+            return data
+        if isinstance(data, str):
+            try:
+                result = json.loads(data)
+                if isinstance(result, list):
+                    return result
+            except (json.JSONDecodeError, ValueError):
+                pass
+        return []
+
+    def to_representation(self, value):
+        return value if value is not None else []
+
+
 class WorkSampleSerializer(serializers.ModelSerializer):
+    tags = FlexibleTagsField(required=False, default=list)
+
     class Meta:
         model = WorkSample
         fields = '__all__'
-
-    def to_internal_value(self, data):
-        # When tags arrive as a JSON string (from FormData), parse them
-        if 'tags' in data and isinstance(data.get('tags'), str):
-            import json
-            try:
-                data = data.copy()
-                data['tags'] = json.loads(data['tags'])
-            except (json.JSONDecodeError, TypeError):
-                pass
-        return super().to_internal_value(data)
 
 class GigSerializer(serializers.ModelSerializer):
     client_name = serializers.CharField(source='client_profile.name', read_only=True)

@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
-import { Badge } from "@/components/ui/badge";
 import {
   Plus,
   Trash2,
@@ -16,7 +15,6 @@ import {
   Link as LinkIcon,
   Video,
   Loader2,
-  X,
   AlertCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -29,9 +27,6 @@ export default function PortfolioPage() {
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState("");
 
-  const [tags, setTags] = useState<string[]>([]);
-  const [tagInput, setTagInput] = useState("");
-
   const [newSample, setNewSample] = useState({
     title: "",
     description: "",
@@ -39,25 +34,6 @@ export default function PortfolioPage() {
     link: "",
     media: null as File | null,
   });
-
-  function handleTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      addTag();
-    }
-  }
-
-  function addTag() {
-    const trimmed = tagInput.trim().replace(/,+$/, "").trim();
-    if (trimmed && !tags.includes(trimmed)) {
-      setTags([...tags, trimmed]);
-    }
-    setTagInput("");
-  }
-
-  function removeTag(tag: string) {
-    setTags(tags.filter((t) => t !== tag));
-  }
 
   useEffect(() => {
     if (!profile) return;
@@ -81,12 +57,6 @@ export default function PortfolioPage() {
     setAdding(true);
     setAddError("");
 
-    // Flush any pending tag text that hasn't been committed via Enter/blur yet
-    const pendingTag = tagInput.trim().replace(/,+$/, "").trim();
-    const finalTags = pendingTag && !tags.includes(pendingTag)
-      ? [...tags, pendingTag]
-      : tags;
-
     try {
       const formData = new FormData();
       formData.append("profile", profile.id.toString());
@@ -100,25 +70,14 @@ export default function PortfolioPage() {
         formData.append("media", newSample.media);
       }
 
-      // Do NOT include tags in the multipart FormData — DRF's JSONField can't
-      // parse JSON values that arrive inside multipart/form-data. Instead we
-      // create the sample first (file upload), then PATCH with tags via a
-      // regular JSON body where JSONField works correctly.
-      const created = await api.workSamples.create(formData, true);
-
-      if (finalTags.length > 0 && created?.id) {
-        await api.workSamples.update(created.id, { tags: finalTags });
-      }
+      await api.workSamples.create(formData, true);
 
       setNewSample({ title: "", description: "", sample_type: "image", link: "", media: null });
-      setTags([]);
-      setTagInput("");
       addToast({ type: "success", title: "Work Added", message: "Your work sample has been added to your portfolio." });
       loadSamples();
     } catch (err: any) {
       console.error("Error adding sample:", err);
       const msg =
-        err.tags?.[0] ||
         err.media?.[0] ||
         err.detail ||
         err.title?.[0] ||
@@ -217,37 +176,6 @@ export default function PortfolioPage() {
                 rows={3}
               />
 
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Skill Tags</label>
-                <Input
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleTagKeyDown}
-                  onBlur={addTag}
-                  placeholder="Type a skill and press Enter"
-                />
-                {tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {tags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant="secondary"
-                        className="px-2 py-0.5 bg-indigo-50 text-indigo-700 border-indigo-100 flex items-center gap-1"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="hover:text-red-600 transition-colors cursor-pointer"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-
               {addError && (
                 <div className="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 px-3 py-2.5">
                   <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
@@ -315,19 +243,6 @@ export default function PortfolioPage() {
                       <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
                         {sample.description}
                       </p>
-                      {sample.tags?.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {sample.tags.map((tag: string) => (
-                            <Badge
-                              key={tag}
-                              variant="secondary"
-                              className="text-xs px-1.5 py-0 bg-indigo-50 text-indigo-700 border-indigo-100"
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
                       {sample.link && (
                         <a
                           href={sample.link}

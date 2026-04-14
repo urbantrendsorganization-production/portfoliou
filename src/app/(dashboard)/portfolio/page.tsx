@@ -100,11 +100,15 @@ export default function PortfolioPage() {
         formData.append("media", newSample.media);
       }
 
-      // Always send tags as a JSON string — even an empty array — so the
-      // backend field is never absent (avoids "Value must be valid JSON" errors).
-      formData.append("tags", JSON.stringify(finalTags));
+      // Do NOT include tags in the multipart FormData — DRF's JSONField can't
+      // parse JSON values that arrive inside multipart/form-data. Instead we
+      // create the sample first (file upload), then PATCH with tags via a
+      // regular JSON body where JSONField works correctly.
+      const created = await api.workSamples.create(formData, true);
 
-      await api.workSamples.create(formData, true);
+      if (finalTags.length > 0 && created?.id) {
+        await api.workSamples.update(created.id, { tags: finalTags });
+      }
 
       setNewSample({ title: "", description: "", sample_type: "image", link: "", media: null });
       setTags([]);

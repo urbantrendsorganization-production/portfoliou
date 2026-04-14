@@ -11,12 +11,9 @@ export function Footer() {
               <img
                 src="https://res.cloudinary.com/dvifkm1ex/image/upload/v1774943398/PortfolioU_1_bqx4cv.png"
                 alt="Logo"
-                className="w-10" // Adjust w-10 (2.5rem) to your preferred size
+                className="w-32 h-auto"
               />
             </div>
-            {/* <span className="font-bold text-2xl text-gray-900">
-              Portfolio<span className="text-blue-600">U</span>
-            </span> */}
           </Link>
             <p className="text-sm leading-relaxed">
               The talent marketplace for college creatives. Showcase your work.
@@ -80,11 +77,12 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-12 pt-8 border-t border-gray-800 text-sm text-center">
+        <div className="mt-12 pt-8 border-t border-gray-800 text-sm text-center space-y-1">
           <p>
             &copy; {new Date().getFullYear()} PortfolioU by UrbanTrends. All
             rights reserved.
           </p>
+          <p className="text-gray-600 text-xs">v1.0.0 Beta — Nairobi, Kenya</p>
         </div>
       </div>
     </footer>

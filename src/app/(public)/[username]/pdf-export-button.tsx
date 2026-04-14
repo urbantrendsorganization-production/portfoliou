@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FileText, Loader2 } from "lucide-react";
 import { Profile, WorkSample } from "@/types/database";
+import { useAppStore } from "@/lib/store";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
@@ -14,10 +15,11 @@ interface PDFExportButtonProps {
 
 export function PDFExportButton({ profile, samples }: PDFExportButtonProps) {
   const [exporting, setExporting] = useState(false);
+  const addToast = useAppStore((s) => s.addToast);
 
   async function handleExport() {
     if (!profile.is_premium) {
-      alert("PDF Portfolio Export is a Premium feature. Upgrade to export your portfolio!");
+      addToast({ type: "info", title: "Premium Feature", message: "PDF export is a Premium feature. Upgrade to unlock it." });
       return;
     }
 
@@ -55,7 +57,7 @@ export function PDFExportButton({ profile, samples }: PDFExportButtonProps) {
       pdf.save(`${profile.name?.replace(/\s+/g, "_")}_Portfolio.pdf`);
     } catch (err) {
       console.error("PDF Export error:", err);
-      alert("Failed to export PDF. Please try again.");
+      addToast({ type: "info", title: "Export Failed", message: "Could not export PDF. Please try again." });
     } finally {
       setExporting(false);
     }

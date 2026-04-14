@@ -195,6 +195,16 @@ export function DashboardShell({ children }: DashboardShellProps) {
           </div>
         )}
 
+        {/* Version badge */}
+        {!collapsed && (
+          <div className="px-4 pb-2 flex items-center justify-center">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-800/60 border border-gray-200/80 dark:border-gray-700/60 rounded-full px-2.5 py-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 flex-shrink-0" />
+              v1.0.0 · Beta
+            </span>
+          </div>
+        )}
+
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="flex items-center justify-center p-3 border-t border-gray-200/80 dark:border-gray-800 text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-all duration-200 cursor-pointer"

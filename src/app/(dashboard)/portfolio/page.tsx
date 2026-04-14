@@ -17,15 +17,18 @@ import {
   Video,
   Loader2,
   X,
+  AlertCircle,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function PortfolioPage() {
   const profile = useAppStore((s) => s.profile);
+  const addToast = useAppStore((s) => s.addToast);
   const [samples, setSamples] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
-  
+  const [addError, setAddError] = useState("");
+
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
 
@@ -76,6 +79,13 @@ export default function PortfolioPage() {
     e.preventDefault();
     if (!profile) return;
     setAdding(true);
+    setAddError("");
+
+    // Flush any pending tag text that hasn't been committed via Enter/blur yet
+    const pendingTag = tagInput.trim().replace(/,+$/, "").trim();
+    const finalTags = pendingTag && !tags.includes(pendingTag)
+      ? [...tags, pendingTag]
+      : tags;
 
     try {
       const formData = new FormData();
@@ -83,31 +93,33 @@ export default function PortfolioPage() {
       formData.append("title", newSample.title);
       formData.append("description", newSample.description);
       formData.append("sample_type", newSample.sample_type);
-      
+
       if (newSample.sample_type === "link") {
         formData.append("link", newSample.link);
       } else if (newSample.media) {
         formData.append("media", newSample.media);
       }
 
-      if (tags.length > 0) {
-        formData.append("tags", JSON.stringify(tags));
-      }
+      // Always send tags as a JSON string — even an empty array — so the
+      // backend field is never absent (avoids "Value must be valid JSON" errors).
+      formData.append("tags", JSON.stringify(finalTags));
 
       await api.workSamples.create(formData, true);
 
-      setNewSample({
-        title: "",
-        description: "",
-        sample_type: "image",
-        link: "",
-        media: null,
-      });
+      setNewSample({ title: "", description: "", sample_type: "image", link: "", media: null });
       setTags([]);
       setTagInput("");
+      addToast({ type: "success", title: "Work Added", message: "Your work sample has been added to your portfolio." });
       loadSamples();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error adding sample:", err);
+      const msg =
+        err.tags?.[0] ||
+        err.media?.[0] ||
+        err.detail ||
+        err.title?.[0] ||
+        "Could not add work sample. Please try again.";
+      setAddError(msg);
     } finally {
       setAdding(false);
     }
@@ -231,6 +243,13 @@ export default function PortfolioPage() {
                   </div>
                 )}
               </div>
+
+              {addError && (
+                <div className="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 px-3 py-2.5">
+                  <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-red-700 dark:text-red-400">{addError}</p>
+                </div>
+              )}
 
               <Button type="submit" fullWidth loading={adding}>
                 <Plus className="h-4 w-4" /> Add to Portfolio

@@ -350,6 +350,10 @@ export default function DashboardPage() {
                 <span className="text-xs font-semibold text-indigo-200 uppercase tracking-widest">
                   {getGreeting()}
                 </span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-300 bg-white/10 border border-white/15 rounded-full px-2 py-0.5">
+                  <span className="h-1 w-1 rounded-full bg-emerald-400" />
+                  v1.0.0 Beta
+                </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight leading-snug">
                 {profile.name || "Creative"}
@@ -394,7 +398,7 @@ export default function DashboardPage() {
             icon={<Eye className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />}
             label="Profile Views"
             value={stats.profileViews}
-            trend="+12% this week"
+            trend={stats.profileViews > 0 ? "+12% this week" : undefined}
             trendPositive
             accentClass="bg-gradient-to-r from-indigo-500 to-indigo-600"
             iconBgClass="bg-indigo-50 dark:bg-indigo-950/70"
@@ -404,7 +408,7 @@ export default function DashboardPage() {
             icon={<MousePointer2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />}
             label="Link Clicks"
             value={stats.linkClicks}
-            trend="+5% this week"
+            trend={stats.linkClicks > 0 ? "+5% this week" : undefined}
             trendPositive
             accentClass="bg-gradient-to-r from-purple-500 to-purple-600"
             iconBgClass="bg-purple-50 dark:bg-purple-950/70"
@@ -455,25 +459,44 @@ export default function DashboardPage() {
                     A complete profile gets 3x more views
                   </p>
                 </div>
-                <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
-                  {profile.avatar_url || profile.avatar ? (stats.totalSamples > 0 ? "75%" : "50%") : "25%"}
-                </span>
+                {(() => {
+                  const checks = [
+                    !!(profile.avatar_url || profile.avatar),
+                    stats.totalSamples > 0,
+                    !!(profile.bio),
+                    !!(profile.skills && profile.skills.length > 0),
+                  ];
+                  const done = checks.filter(Boolean).length;
+                  const pct = Math.round((done / checks.length) * 100);
+                  return (
+                    <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">{pct}%</span>
+                  );
+                })()}
               </div>
               <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-700"
-                  style={{
-                    width: profile.avatar_url || profile.avatar
-                      ? stats.totalSamples > 0 ? "75%" : "50%"
-                      : "25%",
-                  }}
-                />
+                {(() => {
+                  const checks = [
+                    !!(profile.avatar_url || profile.avatar),
+                    stats.totalSamples > 0,
+                    !!(profile.bio),
+                    !!(profile.skills && profile.skills.length > 0),
+                  ];
+                  const done = checks.filter(Boolean).length;
+                  const pct = Math.round((done / checks.length) * 100);
+                  return (
+                    <div
+                      className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-700"
+                      style={{ width: `${pct}%` }}
+                    />
+                  );
+                })()}
               </div>
-              <div className="grid grid-cols-3 gap-2 mt-3">
+              <div className="grid grid-cols-4 gap-2 mt-3">
                 {[
                   { label: "Photo", done: !!(profile.avatar_url || profile.avatar) },
                   { label: "Work Samples", done: stats.totalSamples > 0 },
                   { label: "Bio", done: !!(profile.bio) },
+                  { label: "Skills", done: !!(profile.skills && profile.skills.length > 0) },
                 ].map(({ label, done }) => (
                   <div key={label} className="flex items-center gap-1.5">
                     <div className={`h-4 w-4 rounded-full flex items-center justify-center flex-shrink-0 ${done ? "bg-indigo-100 dark:bg-indigo-950/80" : "bg-gray-100 dark:bg-gray-800"}`}>

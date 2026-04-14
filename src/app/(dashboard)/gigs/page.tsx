@@ -77,6 +77,7 @@ export default function GigsPage() {
     deadline: "",
   });
 
+  const addToast = useAppStore((s) => s.addToast);
   const router = useRouter();
   const isClient = profile?.role === "client";
   const isStudent = profile?.role === "student";
@@ -148,7 +149,7 @@ export default function GigsPage() {
     const content = `Hi ${studentName}, regarding your application for "${gigTitle}" — `;
     try {
       await api.messages.send({ receiver: studentProfileId, content });
-      alert(`Message thread started with ${studentName}. Check your Messages page to continue the conversation.`);
+      addToast({ type: "message", title: "Message Sent", message: `Thread started with ${studentName}. Go to Messages to continue.` });
     } catch (err) {
       console.error("Error sending message:", err);
     }
@@ -200,10 +201,10 @@ export default function GigsPage() {
       }
       setApplyingTo(null);
       setApplicationMessage("");
-      alert("Application sent successfully!");
+      addToast({ type: "success", title: "Application Sent", message: "Your application has been submitted successfully!" });
     } catch (err: any) {
       const msg = err.non_field_errors?.[0] || err.detail || "You have already applied for this gig.";
-      alert(msg);
+      addToast({ type: "info", title: "Application Error", message: msg });
     }
   }
 

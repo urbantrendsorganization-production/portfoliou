@@ -8,10 +8,11 @@ services:
       - portfoliou_postgres_data:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:5435:5432"
+    env_file: .env.production
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-portfoliou}
       POSTGRES_USER: ${POSTGRES_USER:-portfoliou}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-portfoliou}"]
       interval: 5s
@@ -20,7 +21,7 @@ services:
     networks:
       - portfoliou-net
 
-  # ── Redis (for WebSocket channel layer) ──
+  # ── Redis ──
   portfoliou-redis:
     image: redis:7-alpine
     container_name: portfoliou-redis
@@ -35,7 +36,7 @@ services:
     networks:
       - portfoliou-net
 
-  # ── Django Backend (Daphne ASGI) ──
+  # ── Django Backend ──
   portfoliou-backend:
     build:
       context: ./backend
@@ -50,6 +51,9 @@ services:
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER:-portfoliou}:${POSTGRES_PASSWORD}@portfoliou-db:5432/${POSTGRES_DB:-portfoliou}
       REDIS_URL: redis://portfoliou-redis:6379/0
+      # Fixes the 301 Redirect Loop by telling Django it's behind HTTPS
+      SECURE_PROXY_SSL_HEADER: HTTP_X_FORWARDED_PROTO,https
+      DEBUG: "False"
     depends_on:
       portfoliou-db:
         condition: service_healthy
@@ -63,10 +67,11 @@ services:
     build:
       context: .
       args:
+        # These are injected during 'docker build' - essential for Next.js
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api}
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:-}
-        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:8080}
-        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://portfoliou.urbantrends.dev}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
     image: portfoliou-frontend
     container_name: portfoliou-frontend
     restart: unless-stopped
@@ -75,12 +80,13 @@ services:
     env_file: .env.production
     environment:
       BACKEND_INTERNAL_URL: http://portfoliou-backend:8000/api
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
     depends_on:
       - portfoliou-backend
     networks:
       - portfoliou-net
 
-  # ── Nginx Reverse Proxy ──
+  # ── Nginx Proxy ──
   portfoliou-nginx:
     image: nginx:alpine
     container_name: portfoliou-nginx

@@ -32,11 +32,15 @@ async function refreshToken() {
   return null;
 }
 
+const AUTH_ENDPOINTS = new Set(['auth/login/', 'auth/register/', 'auth/google/']);
+
 async function apiRequest(endpoint: string, options: RequestOptions = {}) {
   const { method = 'GET', body, headers = {}, isFormData = false } = options;
-  let accessToken = localStorage.getItem('access_token');
+  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+  const isAuthEndpoint = AUTH_ENDPOINTS.has(normalizedEndpoint);
+  let accessToken = isAuthEndpoint ? null : localStorage.getItem('access_token');
 
-  const fullUrl = `${API_URL}/${endpoint.startsWith('/') ? endpoint.slice(1) : endpoint}`;
+  const fullUrl = `${API_URL}/${normalizedEndpoint}`;
 
   const fetchOptions: RequestInit = {
     method,

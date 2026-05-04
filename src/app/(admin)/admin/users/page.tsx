@@ -24,6 +24,7 @@ import {
   MapPin,
   GraduationCap,
   Briefcase,
+  Shield,
 } from "lucide-react";
 
 interface AdminProfile {
@@ -36,6 +37,7 @@ interface AdminProfile {
   name: string;
   username: string | null;
   school: string;
+  college_name: string | null;
   discipline: string;
   bio: string;
   avatar: string | null;
@@ -74,6 +76,7 @@ export default function AdminUsersPage() {
   const [deleteTarget, setDeleteTarget] = useState<AdminProfile | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [togglingPremium, setTogglingPremium] = useState<number | null>(null);
+  const [togglingStaff, setTogglingStaff] = useState<number | null>(null);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -121,6 +124,31 @@ export default function AdminUsersPage() {
     }
   }
 
+  async function handleToggleStaff(user: AdminProfile) {
+    setTogglingStaff(user.id);
+    try {
+      await api.admin.updateUser(user.id, { is_staff: !user.is_staff });
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === user.id ? { ...u, is_staff: !u.is_staff } : u
+        )
+      );
+      if (selectedUser?.id === user.id) {
+        setSelectedUser({ ...selectedUser, is_staff: !user.is_staff });
+      }
+      addToast({
+        title: "User Updated",
+        message: `${user.name || user.user_username} is now ${!user.is_staff ? "an admin" : "a regular user"}.`,
+        type: "success",
+      });
+    } catch (err) {
+      console.error("Failed to toggle staff:", err);
+      addToast({ title: "Error", message: "Failed to update user.", type: "info" });
+    } finally {
+      setTogglingStaff(null);
+    }
+  }
+
   async function handleDeleteUser() {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -146,37 +174,39 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">User Management</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           View, search, and manage all platform users.
         </p>
       </div>
 
       {/* Filters */}
-      <Card className="flex flex-col sm:flex-row gap-3">
-        <div className="flex-1">
+      <Card className="flex flex-col md:flex-row gap-4 p-4">
+        <div className="flex-1 w-full">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search by name, username, or email..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 w-full"
             />
           </div>
         </div>
-        <Select
-          options={roleOptions}
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-          className="sm:w-40"
-        />
-        <Select
-          options={disciplineOptions}
-          value={disciplineFilter}
-          onChange={(e) => setDisciplineFilter(e.target.value)}
-          className="sm:w-52"
-        />
+        <div className="flex flex-row gap-3 w-full md:w-auto">
+          <Select
+            options={roleOptions}
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="flex-1 md:w-40"
+          />
+          <Select
+            options={disciplineOptions}
+            value={disciplineFilter}
+            onChange={(e) => setDisciplineFilter(e.target.value)}
+            className="flex-1 md:w-52"
+          />
+        </div>
       </Card>
 
       {/* Users table */}
@@ -191,28 +221,28 @@ export default function AdminUsersPage() {
           description="Try adjusting your search or filter criteria."
         />
       ) : (
-        <Card padding={false}>
+        <Card padding={false} className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">User</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Email</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Role</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Discipline</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden sm:table-cell">Premium</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden xl:table-cell">Joined</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+                <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">User</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100 hidden md:table-cell">Email</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">Role</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100 hidden sm:table-cell">Discipline</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100 hidden sm:table-cell">Status</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100 hidden xl:table-cell">Joined</th>
+                  <th className="text-right px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {users.map((user) => (
                   <tr
                     key={user.id}
-                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                    className="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
                     onClick={() => setSelectedUser(user)}
                   >
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
                         <Avatar
                           src={user.avatar_url}
@@ -220,50 +250,57 @@ export default function AdminUsersPage() {
                           size="sm"
                         />
                         <div className="min-w-0">
-                          <p className="font-medium text-gray-900 truncate">
+                          <p className="font-medium text-gray-900 dark:text-gray-100 truncate">
                             {user.name || user.user_username}
                           </p>
-                          <p className="text-xs text-gray-500 truncate">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                             @{user.username || user.user_username}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-600 hidden md:table-cell truncate max-w-48">
-                      {user.email}
+                    <td className="px-4 py-4 text-gray-600 dark:text-gray-400 hidden md:table-cell">
+                      <div className="truncate max-w-[200px]">{user.email}</div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-4">
                       <Badge variant={user.role === "student" ? "default" : "secondary"}>
                         {user.role}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 hidden lg:table-cell">
+                    <td className="px-4 py-4 hidden sm:table-cell">
                       {user.discipline ? (
-                        <span className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium", getDisciplineColor(user.discipline))}>
+                        <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider", getDisciplineColor(user.discipline))}>
                           {user.discipline}
                         </span>
                       ) : (
-                        <span className="text-gray-400">--</span>
+                        <span className="text-gray-400 text-xs">--</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 hidden sm:table-cell">
-                      {user.is_premium ? (
-                        <Badge variant="premium">
-                          <Crown className="h-3 w-3 mr-1" />
-                          Premium
-                        </Badge>
-                      ) : (
-                        <span className="text-gray-400 text-xs">Free</span>
-                      )}
+                    <td className="px-4 py-4 hidden sm:table-cell">
+                      <div className="flex flex-col gap-1">
+                        {user.is_premium ? (
+                          <Badge variant="premium" className="w-fit">
+                            <Crown className="h-3 w-3 mr-1" />
+                            Premium
+                          </Badge>
+                        ) : (
+                          <span className="text-gray-400 text-xs px-2.5">Free</span>
+                        )}
+                        {user.is_staff && (
+                          <Badge variant="secondary" className="w-fit">
+                            Admin
+                          </Badge>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-4 py-3 text-gray-500 hidden xl:table-cell whitespace-nowrap">
+                    <td className="px-4 py-4 text-gray-500 dark:text-gray-400 hidden xl:table-cell whitespace-nowrap text-xs">
                       {formatDate(user.date_joined || user.created_at)}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => setSelectedUser(user)}
-                          className="p-1.5 rounded-md text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 transition-colors cursor-pointer"
                           title="View details"
                         >
                           <Eye className="h-4 w-4" />
@@ -272,10 +309,10 @@ export default function AdminUsersPage() {
                           onClick={() => handleTogglePremium(user)}
                           disabled={togglingPremium === user.id}
                           className={cn(
-                            "p-1.5 rounded-md transition-colors cursor-pointer",
+                            "p-2 rounded-lg transition-colors cursor-pointer",
                             user.is_premium
-                              ? "text-amber-500 hover:text-amber-700 hover:bg-amber-50"
-                              : "text-gray-400 hover:text-amber-600 hover:bg-amber-50"
+                              ? "text-amber-500 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-900/30"
+                              : "text-gray-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-900/30"
                           )}
                           title={user.is_premium ? "Remove premium" : "Make premium"}
                         >
@@ -287,7 +324,7 @@ export default function AdminUsersPage() {
                         </button>
                         <button
                           onClick={() => setDeleteTarget(user)}
-                          className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/50 transition-colors cursor-pointer"
                           title="Delete user"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -299,7 +336,7 @@ export default function AdminUsersPage() {
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 border-t border-gray-200 text-sm text-gray-500">
+          <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
             Showing {users.length} user{users.length !== 1 ? "s" : ""}
           </div>
         </Card>
@@ -368,6 +405,12 @@ export default function AdminUsersPage() {
                   {selectedUser.school}
                 </div>
               )}
+              {selectedUser.college_name && (
+                <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                  <GraduationCap className="h-4 w-4 text-gray-400" />
+                  <span className="text-xs bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded-full">{selectedUser.college_name}</span>
+                </div>
+              )}
             </div>
 
             {/* Discipline & skills */}
@@ -407,6 +450,15 @@ export default function AdminUsersPage() {
               >
                 <Crown className="h-4 w-4" />
                 {selectedUser.is_premium ? "Remove Premium" : "Make Premium"}
+              </Button>
+              <Button
+                variant={selectedUser.is_staff ? "secondary" : "primary"}
+                size="sm"
+                loading={togglingStaff === selectedUser.id}
+                onClick={() => handleToggleStaff(selectedUser)}
+              >
+                <Shield className="h-4 w-4" />
+                {selectedUser.is_staff ? "Remove Admin" : "Make Admin"}
               </Button>
               <Button
                 variant="danger"

@@ -120,22 +120,22 @@ export default function AdminContentPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Content Moderation</h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Content Moderation</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           Review and manage all work samples uploaded to the platform.
         </p>
       </div>
 
       {/* Filters */}
-      <Card className="flex flex-col sm:flex-row gap-3">
-        <div className="flex-1">
+      <Card className="flex flex-col md:flex-row gap-4 p-4">
+        <div className="flex-1 w-full">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Search by title or owner..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 w-full"
             />
           </div>
         </div>
@@ -143,7 +143,7 @@ export default function AdminContentPage() {
           options={typeOptions}
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
-          className="sm:w-40"
+          className="w-full md:w-40"
         />
       </Card>
 
@@ -159,27 +159,26 @@ export default function AdminContentPage() {
           description="Try adjusting your search or filter criteria."
         />
       ) : (
-        <Card padding={false}>
+        <Card padding={false} className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Preview</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Title</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden md:table-cell">Owner</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600">Type</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden lg:table-cell">Tags</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 hidden xl:table-cell">Created</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
+                <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">Preview</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">Title</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100 hidden md:table-cell">Owner</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">Type</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100 hidden lg:table-cell">Tags</th>
+                  <th className="text-right px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {samples.map((sample) => {
                   const thumbSrc = getThumbnailSrc(sample);
                   return (
-                    <tr key={sample.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="h-12 w-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
+                    <tr key={sample.id} className="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors">
+                      <td className="px-4 py-4">
+                        <div className="h-12 w-12 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 ring-1 ring-gray-200 dark:ring-gray-600">
                           {thumbSrc ? (
                             <img
                               src={thumbSrc}
@@ -187,57 +186,54 @@ export default function AdminContentPage() {
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <span className="text-gray-400">
+                            <span className="text-gray-400 dark:text-gray-500">
                               {typeIcons[sample.sample_type] || <ImageIcon className="h-4 w-4" />}
                             </span>
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-4">
                         <div className="min-w-0">
-                          <p className="font-medium text-gray-900 truncate max-w-56">{sample.title}</p>
+                          <p className="font-medium text-gray-900 dark:text-gray-100 truncate max-w-56">{sample.title}</p>
                           {sample.description && (
-                            <p className="text-xs text-gray-500 truncate max-w-56">{sample.description}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-56 mt-0.5">{sample.description}</p>
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-gray-600 hidden md:table-cell">
+                      <td className="px-4 py-4 text-gray-600 dark:text-gray-400 hidden md:table-cell">
                         <div className="min-w-0">
-                          <p className="truncate">{sample.owner_name}</p>
-                          <p className="text-xs text-gray-400">@{sample.owner_username}</p>
+                          <p className="truncate text-gray-900 dark:text-gray-100">{sample.owner_name}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">@{sample.owner_username}</p>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
-                        <Badge variant="secondary">
-                          <span className="mr-1">{typeIcons[sample.sample_type]}</span>
+                      <td className="px-4 py-4">
+                        <Badge variant="secondary" className="whitespace-nowrap">
+                          <span className="mr-1.5 opacity-70">{typeIcons[sample.sample_type]}</span>
                           {sample.sample_type}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 hidden lg:table-cell">
+                      <td className="px-4 py-4 hidden lg:table-cell">
                         <div className="flex flex-wrap gap-1 max-w-48">
                           {sample.tags && sample.tags.length > 0 ? (
                             sample.tags.slice(0, 3).map((tag, i) => (
-                              <Badge key={i} variant="secondary">{tag}</Badge>
+                              <Badge key={i} variant="secondary" className="text-[10px] uppercase tracking-wider">{tag}</Badge>
                             ))
                           ) : (
-                            <span className="text-gray-400">--</span>
+                            <span className="text-gray-400 dark:text-gray-500 text-xs">--</span>
                           )}
                           {sample.tags && sample.tags.length > 3 && (
-                            <Badge variant="secondary">+{sample.tags.length - 3}</Badge>
+                            <Badge variant="secondary" className="text-[10px]">+{sample.tags.length - 3}</Badge>
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-gray-500 hidden xl:table-cell whitespace-nowrap">
-                        {formatDate(sample.created_at)}
-                      </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-4">
                         <div className="flex items-center justify-end gap-1">
                           {sample.link && (
                             <a
                               href={sample.link}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="p-1.5 rounded-md text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                              className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 transition-colors"
                               title="Open link"
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -246,7 +242,7 @@ export default function AdminContentPage() {
                           )}
                           <button
                             onClick={() => setDeleteTarget(sample)}
-                            className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                            className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/50 transition-colors cursor-pointer"
                             title="Delete work sample"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -259,7 +255,7 @@ export default function AdminContentPage() {
               </tbody>
             </table>
           </div>
-          <div className="px-4 py-3 border-t border-gray-200 text-sm text-gray-500">
+          <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-700 text-sm text-gray-500 dark:text-gray-400">
             Showing {samples.length} work sample{samples.length !== 1 ? "s" : ""}
           </div>
         </Card>

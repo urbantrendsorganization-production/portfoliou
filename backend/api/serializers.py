@@ -80,8 +80,22 @@ class FlexibleTagsField(serializers.Field):
         return value if value is not None else []
 
 
+def validate_media_file(value):
+    allowed = {
+        'image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml',
+        'video/mp4', 'video/webm', 'video/quicktime',
+        'application/pdf',
+    }
+    if hasattr(value, 'content_type') and value.content_type not in allowed:
+        raise serializers.ValidationError(
+            f"Unsupported file type. Allowed: JPEG, PNG, GIF, WebP, SVG, MP4, WebM, MOV, PDF."
+        )
+    return value
+
+
 class WorkSampleSerializer(serializers.ModelSerializer):
     tags = FlexibleTagsField(required=False, default=list)
+    media = serializers.FileField(required=False, allow_null=True, validators=[validate_media_file])
 
     class Meta:
         model = WorkSample
@@ -164,7 +178,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class AdminProfileSerializer(serializers.ModelSerializer):
     user_username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.EmailField(source='user.email', read_only=True)
-    is_staff = serializers.BooleanField(source='user.is_staff', read_only=True)
+    is_staff = serializers.BooleanField(source='user.is_staff', required=False)
     avatar_url = serializers.SerializerMethodField()
     date_joined = serializers.DateTimeField(source='user.date_joined', read_only=True)
     college_name = serializers.CharField(source='college.name', read_only=True, default=None)

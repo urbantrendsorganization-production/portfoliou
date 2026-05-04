@@ -57,7 +57,7 @@ export const PLANS = {
   },
 } as const;
 
-export const APP_VERSION = "1.1.0";
+export const APP_VERSION = "1.2.1";
 
 export const SKILL_SUGGESTIONS: Record<string, string[]> = {
   "Beauty & Cosmetology": [

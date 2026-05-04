@@ -20,7 +20,7 @@ from django.conf import settings
 from django.utils import timezone
 import uuid
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 
 
 @api_view(['GET'])
@@ -197,6 +197,30 @@ class WorkSampleViewSet(viewsets.ModelViewSet):
             return self.queryset.filter(profile_id=profile_id)
         return self.queryset
 
+    def perform_create(self, serializer):
+        profile_id = self.request.data.get('profile')
+        try:
+            profile = self.request.user.profile
+        except Exception:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("No profile found for this user.")
+        if str(profile.id) != str(profile_id):
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You can only add work samples to your own profile.")
+        serializer.save()
+
+    def perform_update(self, serializer):
+        if serializer.instance.profile != self.request.user.profile:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You can only edit your own work samples.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.profile != self.request.user.profile:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You can only delete your own work samples.")
+        instance.delete()
+
 class GigViewSet(viewsets.ModelViewSet):
     queryset = Gig.objects.all()
     serializer_class = GigSerializer
@@ -211,6 +235,18 @@ class GigViewSet(viewsets.ModelViewSet):
         if discipline:
             qs = qs.filter(discipline=discipline)
         return qs
+
+    def perform_update(self, serializer):
+        if serializer.instance.client_profile != self.request.user.profile:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You can only edit your own gigs.")
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        if instance.client_profile != self.request.user.profile:
+            from rest_framework.exceptions import PermissionDenied
+            raise PermissionDenied("You can only delete your own gigs.")
+        instance.delete()
 
 class GigApplicationViewSet(viewsets.ModelViewSet):
     queryset = GigApplication.objects.all()
@@ -341,13 +377,10 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
         return self.queryset.filter(profile__user=self.request.user)
 
     def get_permissions(self):
-        # Allow internal webhook calls to create subscriptions
         if self.action == 'create':
             internal_key = self.request.headers.get('X-Internal-Key', '')
-            if internal_key and internal_key == getattr(
-                __import__('django.conf', fromlist=['settings']).settings,
-                'INTERNAL_API_KEY', ''
-            ):
+            configured_key = getattr(settings, 'INTERNAL_API_KEY', '')
+            if configured_key and internal_key == configured_key:
                 return [permissions.AllowAny()]
         return super().get_permissions()
 
@@ -355,6 +388,7 @@ class SubscriptionViewSet(viewsets.ModelViewSet):
 class AnalyticsViewSet(viewsets.ModelViewSet):
     queryset = Analytics.objects.all()
     serializer_class = AnalyticsSerializer
+    throttle_classes = [AuthRateThrottle]
 
     def get_permissions(self):
         if self.action == 'create':
@@ -430,7 +464,10 @@ class AdminUserViewSet(viewsets.ModelViewSet):
         return qs.order_by('-created_at')
 
     def perform_update(self, serializer):
-        # Allow toggling is_premium and role via PATCH
+        is_staff = self.request.data.get('is_staff')
+        if is_staff is not None:
+            serializer.instance.user.is_staff = bool(is_staff)
+            serializer.instance.user.save()
         serializer.save()
 
     def perform_destroy(self, instance):

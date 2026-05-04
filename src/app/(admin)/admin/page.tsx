@@ -178,13 +178,13 @@ export default function AdminOverviewPage() {
                 <div key={item.id} className="px-6 py-3.5 flex items-start gap-3 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                      <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
                         {item.title}
                       </span>
                       <Badge variant={typeInfo.variant}>{typeInfo.label}</Badge>
                     </div>
                     {item.message && (
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5 truncate">{item.message}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{item.message}</p>
                     )}
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                       {item.profile_name || item.profile_username} &middot; {formatDate(item.created_at)}

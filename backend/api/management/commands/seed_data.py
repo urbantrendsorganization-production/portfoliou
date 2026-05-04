@@ -9,7 +9,7 @@ Usage:
 
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from api.models import Profile, Gig
+from api.models import Profile, Gig, College
 from datetime import datetime, timezone, timedelta
 
 
@@ -262,6 +262,25 @@ CLIENT_SEED = [
 ]
 
 
+COLLEGE_SEED = [
+    {"name": "University of Nairobi", "short_name": "UoN", "location": "Nairobi, Kenya", "website": "https://www.uonbi.ac.ke"},
+    {"name": "Strathmore University", "short_name": "SU", "location": "Nairobi, Kenya", "website": "https://www.strathmore.edu"},
+    {"name": "USIU-Africa", "short_name": "USIU", "location": "Nairobi, Kenya", "website": "https://www.usiu.ac.ke"},
+    {"name": "Kenyatta University", "short_name": "KU", "location": "Nairobi, Kenya", "website": "https://www.ku.ac.ke"},
+    {"name": "Jomo Kenyatta University of Agriculture and Technology", "short_name": "JKUAT", "location": "Juja, Kenya", "website": "https://www.jkuat.ac.ke"},
+    {"name": "Daystar University", "short_name": "DU", "location": "Nairobi, Kenya", "website": "https://www.daystar.ac.ke"},
+    {"name": "Moi University", "short_name": "MU", "location": "Eldoret, Kenya", "website": "https://www.mu.ac.ke"},
+    {"name": "Technical University of Mombasa", "short_name": "TUM", "location": "Mombasa, Kenya", "website": "https://www.tum.ac.ke"},
+    {"name": "Aga Khan University", "short_name": "AKU", "location": "Nairobi, Kenya", "website": "https://www.aku.edu"},
+    {"name": "Multimedia University of Kenya", "short_name": "MMU", "location": "Nairobi, Kenya", "website": "https://www.mmu.ac.ke"},
+    {"name": "Nairobi Design Institute", "short_name": "NDI", "location": "Nairobi, Kenya", "website": ""},
+    {"name": "Kenya Institute of Fashion Design", "short_name": "KIFD", "location": "Nairobi, Kenya", "website": ""},
+    {"name": "Mount Kenya University", "short_name": "MKU", "location": "Thika, Kenya", "website": "https://www.mku.ac.ke"},
+    {"name": "United States International University Africa", "short_name": "USIU-A", "location": "Nairobi, Kenya", "website": "https://www.usiu.ac.ke"},
+    {"name": "Riara University", "short_name": "RU", "location": "Nairobi, Kenya", "website": "https://www.riarauniversity.ac.ke"},
+]
+
+
 class Command(BaseCommand):
     help = "Seed the database with realistic demo profiles and gigs for PortfolioU."
 
@@ -276,6 +295,21 @@ class Command(BaseCommand):
         if options["clear"]:
             deleted, _ = User.objects.filter(email__endswith="@demo.portfoliou.dev").delete()
             self.stdout.write(self.style.WARNING(f"Cleared {deleted} existing seed users."))
+
+        created_colleges = 0
+        for c in COLLEGE_SEED:
+            college, created = College.objects.get_or_create(
+                name=c["name"],
+                defaults={
+                    "short_name": c.get("short_name", ""),
+                    "location": c.get("location", ""),
+                    "website": c.get("website", ""),
+                    "is_active": True,
+                },
+            )
+            if created:
+                created_colleges += 1
+        self.stdout.write(self.style.SUCCESS(f"Seeded {created_colleges} new colleges ({College.objects.count()} total in DB)."))
 
         created_students = 0
         for seed in STUDENT_SEED:
@@ -293,12 +327,18 @@ class Command(BaseCommand):
             p.name = pdata["name"]
             p.role = pdata["role"]
             p.discipline = pdata.get("discipline", "")
-            p.school = pdata.get("school", "")
             p.location = pdata.get("location", "")
             p.bio = pdata.get("bio", "")
             p.skills = pdata.get("skills", [])
             p.open_to_work = pdata.get("open_to_work", False)
             p.is_premium = pdata.get("is_premium", False)
+            school_name = pdata.get("school", "")
+            if school_name:
+                try:
+                    p.college = College.objects.get(name=school_name)
+                except College.DoesNotExist:
+                    p.college = None
+            p.school = school_name
             p.username = seed["username"]
             p.save()
 

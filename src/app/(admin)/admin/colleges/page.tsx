@@ -187,36 +187,35 @@ export default function AdminCollegesPage() {
           description="Add the first college to populate the signup dropdown."
         />
       ) : (
-        <Card padding={false}>
+        <Card padding={false} className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Name</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400 hidden sm:table-cell">Short</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400 hidden md:table-cell">Location</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400 hidden lg:table-cell">Website</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Status</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-400 hidden xl:table-cell">Created</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-400">Actions</th>
+                <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">Name</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100 hidden sm:table-cell">Short</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100 hidden md:table-cell">Location</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100 hidden lg:table-cell">Website</th>
+                  <th className="text-left px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">Status</th>
+                  <th className="text-right px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
+              <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {colleges.map((college) => (
                   <tr
                     key={college.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    className="hover:bg-gray-50/80 dark:hover:bg-gray-800/50 transition-colors"
                   >
-                    <td className="px-4 py-3 font-medium text-gray-900 dark:text-gray-100">
+                    <td className="px-4 py-4 font-medium text-gray-900 dark:text-gray-100">
                       {college.name}
                     </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400 hidden sm:table-cell">
-                      {college.short_name || <span className="text-gray-400">--</span>}
+                    <td className="px-4 py-4 text-gray-600 dark:text-gray-400 hidden sm:table-cell">
+                      {college.short_name || <span className="text-gray-400 text-xs">--</span>}
                     </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400 hidden md:table-cell">
-                      {college.location || <span className="text-gray-400">--</span>}
+                    <td className="px-4 py-4 text-gray-600 dark:text-gray-400 hidden md:table-cell">
+                      {college.location || <span className="text-gray-400 text-xs">--</span>}
                     </td>
-                    <td className="px-4 py-3 text-gray-600 dark:text-gray-400 hidden lg:table-cell">
+                    <td className="px-4 py-4 text-gray-600 dark:text-gray-400 hidden lg:table-cell">
                       {college.website ? (
                         <a
                           href={college.website}
@@ -227,31 +226,28 @@ export default function AdminCollegesPage() {
                           <ExternalLink className="h-3 w-3" /> Link
                         </a>
                       ) : (
-                        <span className="text-gray-400">--</span>
+                        <span className="text-gray-400 text-xs">--</span>
                       )}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-4">
                       {college.is_active ? (
                         <Badge variant="success">Active</Badge>
                       ) : (
                         <Badge variant="secondary">Inactive</Badge>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-gray-500 dark:text-gray-400 hidden xl:table-cell whitespace-nowrap">
-                      {formatDate(college.created_at)}
-                    </td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-4">
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => openEdit(college)}
-                          className="p-1.5 rounded-md text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/50 transition-colors cursor-pointer"
                           title="Edit"
                         >
                           <Pencil className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => setDeleteTarget(college)}
-                          className="p-1.5 rounded-md text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/60 transition-colors cursor-pointer"
+                          className="p-2 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/50 transition-colors cursor-pointer"
                           title="Delete"
                         >
                           <Trash2 className="h-4 w-4" />

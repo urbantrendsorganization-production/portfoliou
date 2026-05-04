@@ -31,7 +31,7 @@ function LoginForm() {
       setProfile(profile);
       router.push(data.is_new_user ? "/onboarding" : redirect);
     } catch (err: any) {
-      setError(err.error || "Google sign-in failed. Please try again.");
+      setError(err.error || err.detail || "Google sign-in failed. Please try again.");
     } finally {
       setGoogleLoading(false);
     }

@@ -36,15 +36,21 @@ export function GoogleSignInButton({
   useEffect(() => {
     if (!GOOGLE_CLIENT_ID) return;
 
-    // Script already loaded by a prior mount of this component
     if (window.google?.accounts) {
       setScriptLoaded(true);
       return;
     }
 
-    // Avoid injecting the script twice if it's already in the DOM
-    if (document.querySelector('script[src="https://accounts.google.com/gsi/client"]')) {
-      return;
+    // Script is in the DOM but hasn't finished loading yet (React StrictMode
+    // double-mounts components, so this runs twice). Attach to the existing
+    // script's load event rather than early-returning with no listener.
+    const existing = document.querySelector<HTMLScriptElement>(
+      'script[src="https://accounts.google.com/gsi/client"]'
+    );
+    if (existing) {
+      const onLoad = () => setScriptLoaded(true);
+      existing.addEventListener("load", onLoad);
+      return () => existing.removeEventListener("load", onLoad);
     }
 
     const script = document.createElement("script");
@@ -58,7 +64,6 @@ export function GoogleSignInButton({
 
   useEffect(() => {
     if (!scriptLoaded || !buttonRef.current || !GOOGLE_CLIENT_ID) return;
-    // Prevent calling initialize() more than once per component lifecycle
     if (initializedRef.current) return;
     initializedRef.current = true;
 
@@ -88,6 +93,11 @@ export function GoogleSignInButton({
     } catch {
       onError?.("Failed to initialize Google Sign-In");
     }
+
+    return () => {
+      initializedRef.current = false;
+      if (buttonRef.current) buttonRef.current.innerHTML = "";
+    };
   }, [scriptLoaded]);
 
   if (!GOOGLE_CLIENT_ID) {

@@ -70,7 +70,7 @@ function SignupForm() {
       // New users go to onboarding to pick role; returning users go straight to dashboard
       router.push(data.is_new_user ? `/onboarding?role=${role}` : "/dashboard");
     } catch (err: any) {
-      setError(err.error || "Google sign-up failed. Please try again.");
+      setError(err.error || err.detail || "Google sign-up failed. Please try again.");
     } finally {
       setGoogleLoading(false);
     }

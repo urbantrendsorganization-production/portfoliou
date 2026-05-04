@@ -3,6 +3,7 @@ from rest_framework import viewsets, permissions, status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import action, api_view, permission_classes as drf_permission_classes
 from rest_framework.permissions import IsAdminUser
+from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
 from .models import Profile, WorkSample, Gig, GigApplication, Message, Bookmark, Analytics, Notification, Subscription, College
 from .serializers import (
@@ -13,12 +14,13 @@ from .serializers import (
     AdminProfileSerializer, AdminGigSerializer, AdminWorkSampleSerializer,
     CollegeSerializer,
 )
+from .throttles import AuthRateThrottle
 from django.db.models import Count, Q
 from django.conf import settings
 from django.utils import timezone
 import uuid
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 
 
 @api_view(['GET'])
@@ -49,9 +51,15 @@ def health_check(request):
     })
 
 
+class ThrottledTokenObtainPairView(TokenObtainPairView):
+    """JWT login endpoint with auth-rate throttle (10 req/min per IP)."""
+    throttle_classes = [AuthRateThrottle]
+
+
 class GoogleAuthView(generics.GenericAPIView):
     """Verify a Google ID token and return JWT tokens."""
     permission_classes = (permissions.AllowAny,)
+    throttle_classes = [AuthRateThrottle]
 
     def post(self, request):
         from google.oauth2 import id_token
@@ -105,6 +113,7 @@ class GoogleAuthView(generics.GenericAPIView):
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (permissions.AllowAny,)
+    throttle_classes = [AuthRateThrottle]
     serializer_class = RegisterSerializer
 
 class ProfileViewSet(viewsets.ModelViewSet):

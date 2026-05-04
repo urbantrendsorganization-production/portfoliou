@@ -7,7 +7,7 @@ services:
     volumes:
       - portfoliou_postgres_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5438:5432"
+      - "127.0.0.1:5435:5432"
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-portfoliou}
       POSTGRES_USER: ${POSTGRES_USER:-portfoliou}
@@ -43,7 +43,7 @@ services:
     container_name: portfoliou-backend
     restart: unless-stopped
     ports:
-      - "127.0.0.1:8004:8000"
+      - "127.0.0.1:8002:8000"
     volumes:
       - portfoliou_media_data:/app/media
     env_file: .env.production
@@ -71,7 +71,7 @@ services:
     container_name: portfoliou-frontend
     restart: unless-stopped
     ports:
-      - "127.0.0.1:3003:3000"
+      - "127.0.0.1:3000:3000"
     env_file: .env.production
     environment:
       BACKEND_INTERNAL_URL: http://portfoliou-backend:8000/api

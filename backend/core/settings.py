@@ -177,10 +177,21 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 # Security headers for production
 if not DEBUG:
+    # This must match what Nginx sends
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=True)
+    
+    # CRITICAL: Set this to False because Nginx is already handling the redirect.
+    # If True, Django will trigger an infinite redirect loop.
+    SECURE_SSL_REDIRECT = False 
+
+    # Keep these for security on your live domain
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    
+    # HSTS settings
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+    # Ensure Django handles trailing slashes consistently to avoid extra 301s
+    APPEND_SLASH = True

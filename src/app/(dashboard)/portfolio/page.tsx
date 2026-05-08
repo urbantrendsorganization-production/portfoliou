@@ -6,9 +6,11 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Modal } from "@/components/ui/modal";
 import { api } from "@/lib/api";
 import { useAppStore } from "@/lib/store";
 import { getSkillSuggestions } from "@/utils/constants";
+import { resolveMediaUrl } from "@/utils/helpers";
 import {
   Plus,
   Trash2,
@@ -21,6 +23,7 @@ import {
   Sparkles,
   X,
   Save,
+  Pencil,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -45,6 +48,10 @@ export default function PortfolioPage() {
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // File input remount keys — incrementing forces the native <input> to clear
+  const [fileInputKey, setFileInputKey] = useState(0);
+  const [editFileInputKey, setEditFileInputKey] = useState(0);
+
   const [newSample, setNewSample] = useState({
     title: "",
     description: "",
@@ -52,6 +59,18 @@ export default function PortfolioPage() {
     link: "",
     media: null as File | null,
   });
+
+  // Edit state
+  const [editingSample, setEditingSample] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    sample_type: "image",
+    link: "",
+    media: null as File | null,
+  });
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [editError, setEditError] = useState("");
 
   useEffect(() => {
     if (!profile) return;
@@ -84,6 +103,16 @@ export default function PortfolioPage() {
     }
   }
 
+  function handleNewTypeChange(nextType: string) {
+    setNewSample((prev) => ({ ...prev, sample_type: nextType, media: null, link: "" }));
+    setFileInputKey((k) => k + 1);
+  }
+
+  function handleEditTypeChange(nextType: string) {
+    setEditForm((prev) => ({ ...prev, sample_type: nextType, media: null, link: "" }));
+    setEditFileInputKey((k) => k + 1);
+  }
+
   async function handleAddSample(e: React.FormEvent) {
     e.preventDefault();
     if (!profile) return;
@@ -106,6 +135,7 @@ export default function PortfolioPage() {
       await api.workSamples.create(formData, true);
 
       setNewSample({ title: "", description: "", sample_type: "image", link: "", media: null });
+      setFileInputKey((k) => k + 1);
       addToast({ type: "success", title: "Work Added", message: "Your work sample has been added to your portfolio." });
       loadSamples();
     } catch (err: any) {
@@ -118,6 +148,67 @@ export default function PortfolioPage() {
       setAddError(msg);
     } finally {
       setAdding(false);
+    }
+  }
+
+  function openEdit(sample: any) {
+    setEditingSample(sample);
+    setEditForm({
+      title: sample.title ?? "",
+      description: sample.description ?? "",
+      sample_type: sample.sample_type ?? "image",
+      link: sample.link ?? "",
+      media: null,
+    });
+    setEditError("");
+    setEditFileInputKey((k) => k + 1);
+  }
+
+  function closeEdit() {
+    if (savingEdit) return;
+    setEditingSample(null);
+    setEditError("");
+  }
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingSample) return;
+    setSavingEdit(true);
+    setEditError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("title", editForm.title);
+      formData.append("description", editForm.description);
+      formData.append("sample_type", editForm.sample_type);
+
+      if (editForm.sample_type === "link") {
+        formData.append("link", editForm.link);
+      } else if (editForm.media) {
+        formData.append("media", editForm.media);
+      }
+
+      const updated = await api.workSamples.update(editingSample.id, formData, true);
+
+      setSamples((prev) =>
+        prev.map((s) => (s.id === editingSample.id ? { ...s, ...updated } : s))
+      );
+      addToast({
+        type: "success",
+        title: "Work Updated",
+        message: "Your work sample has been updated.",
+      });
+      setEditingSample(null);
+    } catch (err: any) {
+      console.error("Error updating sample:", err);
+      const msg =
+        err?.media?.[0] ||
+        err?.detail ||
+        err?.title?.[0] ||
+        "Could not update work sample. Please try again.";
+      setEditError(msg);
+    } finally {
+      setSavingEdit(false);
     }
   }
 
@@ -217,6 +308,12 @@ export default function PortfolioPage() {
     }
   }
 
+  const TYPE_BUTTONS = [
+    { id: "image", icon: ImageIcon, label: "Image" },
+    { id: "link", icon: LinkIcon, label: "Link" },
+    { id: "video", icon: Video, label: "Video" },
+  ] as const;
+
   return (
     <DashboardShell>
       <div className="space-y-8">
@@ -244,15 +341,11 @@ export default function PortfolioPage() {
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
                   <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { id: "image", icon: ImageIcon, label: "Image" },
-                      { id: "link", icon: LinkIcon, label: "Link" },
-                      { id: "video", icon: Video, label: "Video" },
-                    ].map((t) => (
+                    {TYPE_BUTTONS.map((t) => (
                       <button
                         key={t.id}
                         type="button"
-                        onClick={() => setNewSample({ ...newSample, sample_type: t.id })}
+                        onClick={() => handleNewTypeChange(t.id)}
                         className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
                           newSample.sample_type === t.id
                             ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400"
@@ -279,6 +372,7 @@ export default function PortfolioPage() {
                   <div className="space-y-1.5">
                     <label className="text-sm font-medium text-gray-700 dark:text-gray-300">File</label>
                     <input
+                      key={fileInputKey}
                       type="file"
                       accept={newSample.sample_type === "image" ? "image/*" : "video/*"}
                       onChange={(e) => setNewSample({ ...newSample, media: e.target.files?.[0] || null })}
@@ -319,7 +413,6 @@ export default function PortfolioPage() {
                 Highlight what you do best. Suggestions are based on your discipline.
               </p>
 
-              {/* Chips */}
               <div className="flex flex-wrap gap-1.5 mb-3 min-h-[2rem]">
                 {skills.length === 0 ? (
                   <p className="text-xs text-gray-400 dark:text-gray-500 italic">No skills added yet.</p>
@@ -343,7 +436,6 @@ export default function PortfolioPage() {
                 )}
               </div>
 
-              {/* Input with suggestions */}
               <div className="relative" ref={skillInputWrapperRef}>
                 <Input
                   placeholder="Type a skill and press Enter"
@@ -388,7 +480,7 @@ export default function PortfolioPage() {
             </Card>
           </div>
 
-          {/* List */}
+          {/* Work samples list */}
           <div className="lg:col-span-2 space-y-4">
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Your Work Samples</h2>
             {loading ? (
@@ -413,54 +505,66 @@ export default function PortfolioPage() {
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 gap-4">
-                {samples.map((sample) => (
-                  <Card key={sample.id} className="overflow-hidden group">
-                    <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative">
-                      {sample.sample_type === "image" && sample.media && (
-                        <img
-                          src={sample.media}
-                          alt={sample.title}
-                          className="w-full h-full object-cover"
-                        />
-                      )}
-                      {sample.sample_type === "link" && (
-                        <div className="w-full h-full flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
-                          <LinkIcon className="h-8 w-8" />
+                {samples.map((sample) => {
+                  const mediaSrc = resolveMediaUrl(sample.media_url || sample.media);
+                  return (
+                    <Card key={sample.id} className="overflow-hidden group">
+                      <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative">
+                        {sample.sample_type === "image" && mediaSrc && (
+                          <img
+                            src={mediaSrc}
+                            alt={sample.title}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                        {sample.sample_type === "link" && (
+                          <div className="w-full h-full flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
+                            <LinkIcon className="h-8 w-8" />
+                          </div>
+                        )}
+                        <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => openEdit(sample)}
+                            className="p-2 rounded-lg bg-white/90 dark:bg-gray-800/90 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 shadow-sm"
+                            aria-label="Edit work sample"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => requestDelete(sample.id)}
+                            className="p-2 rounded-lg bg-white/90 dark:bg-gray-800/90 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 shadow-sm"
+                            aria-label="Delete work sample"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
-                      )}
-                      <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => requestDelete(sample.id)}
-                          className="p-2 rounded-lg bg-white/90 dark:bg-gray-800/90 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 shadow-sm"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
                       </div>
-                    </div>
-                    <div className="p-4">
-                      <h3 className="font-bold text-gray-900 dark:text-gray-100">{sample.title}</h3>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
-                        {sample.description}
-                      </p>
-                      {sample.link && (
-                        <a
-                          href={sample.link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-xs text-indigo-600 font-medium mt-3 hover:underline"
-                        >
-                          <ExternalLink className="h-3 w-3" /> View Project
-                        </a>
-                      )}
-                    </div>
-                  </Card>
-                ))}
+                      <div className="p-4">
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100">{sample.title}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mt-1">
+                          {sample.description}
+                        </p>
+                        {sample.link && (
+                          <a
+                            href={sample.link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-xs text-indigo-600 font-medium mt-3 hover:underline"
+                          >
+                            <ExternalLink className="h-3 w-3" /> View Project
+                          </a>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
       </div>
 
+      {/* Delete confirmation */}
       <ConfirmDialog
         open={pendingDeleteId !== null}
         title="Delete Work Sample"
@@ -474,6 +578,98 @@ export default function PortfolioPage() {
           if (!deleting) setPendingDeleteId(null);
         }}
       />
+
+      {/* Edit modal */}
+      <Modal
+        isOpen={editingSample !== null}
+        onClose={closeEdit}
+        title="Edit Work Sample"
+        size="md"
+      >
+        <form onSubmit={handleSaveEdit} className="space-y-4">
+          <Input
+            label="Title"
+            value={editForm.title}
+            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+            placeholder="e.g., Summer Fashion Campaign"
+            required
+          />
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+            <div className="grid grid-cols-3 gap-2">
+              {TYPE_BUTTONS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => handleEditTypeChange(t.id)}
+                  className={`flex flex-col items-center gap-1 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
+                    editForm.sample_type === t.id
+                      ? "border-indigo-600 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400"
+                      : "border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600 text-gray-500 dark:text-gray-400"
+                  }`}
+                >
+                  <t.icon className="h-4 w-4" />
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {editForm.sample_type === "link" ? (
+            <Input
+              label="URL"
+              type="url"
+              value={editForm.link}
+              onChange={(e) => setEditForm({ ...editForm, link: e.target.value })}
+              placeholder="https://..."
+              required
+            />
+          ) : (
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Replace File <span className="text-xs text-gray-400 dark:text-gray-500">(optional)</span>
+              </label>
+              <input
+                key={editFileInputKey}
+                type="file"
+                accept={editForm.sample_type === "image" ? "image/*" : "video/*"}
+                onChange={(e) => setEditForm({ ...editForm, media: e.target.files?.[0] || null })}
+                className="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 dark:file:bg-indigo-950 file:text-indigo-700 dark:file:text-indigo-400 hover:file:bg-indigo-100 dark:hover:file:bg-indigo-900"
+              />
+              {editingSample?.media && !editForm.media && (
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Leave blank to keep the existing file.
+                </p>
+              )}
+            </div>
+          )}
+
+          <Textarea
+            label="Description"
+            value={editForm.description}
+            onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+            placeholder="Briefly describe this project..."
+            rows={3}
+          />
+
+          {editError && (
+            <div className="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 px-3 py-2.5">
+              <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-red-700 dark:text-red-400">{editError}</p>
+            </div>
+          )}
+
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <Button type="button" variant="ghost" onClick={closeEdit} disabled={savingEdit}>
+              Cancel
+            </Button>
+            <Button type="submit" loading={savingEdit}>
+              <Save className="h-4 w-4" /> Save Changes
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </DashboardShell>
   );
 }

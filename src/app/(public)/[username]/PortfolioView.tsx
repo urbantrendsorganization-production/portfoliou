@@ -22,6 +22,7 @@ import { useEffect, useState } from "react";
 import { PDFExportButton } from "./pdf-export-button";
 import { ShareProfileButton } from "./share-button";
 import { ViewTracker } from "./view-tracker";
+import { resolveMediaUrl } from "@/utils/helpers";
 
 export default function PublicPortfolioPage() {
   const { username } = useParams();
@@ -103,7 +104,7 @@ export default function PublicPortfolioPage() {
       <div className="h-64 sm:h-80 relative overflow-hidden">
         {profile.cover_image_url ? (
           <img
-            src={profile.cover_image_url}
+            src={resolveMediaUrl(profile.cover_image_url) ?? undefined}
             alt="Cover"
             className="w-full h-full object-cover"
           />
@@ -118,7 +119,7 @@ export default function PublicPortfolioPage() {
         <div className="relative -mt-24 sm:-mt-32 mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
             <Avatar
-              src={profile.avatar_url || profile.avatar}
+              src={resolveMediaUrl(profile.avatar_url || profile.avatar) ?? undefined}
               name={profile.name}
               size="xl"
               className="h-40 w-40 sm:h-48 sm:w-48 border-8 border-white dark:border-gray-950 shadow-2xl"
@@ -238,7 +239,7 @@ export default function PublicPortfolioPage() {
                     <div className="aspect-video relative overflow-hidden bg-gray-100 dark:bg-gray-700">
                       {sample.sample_type === "image" && sample.media ? (
                         <img
-                          src={sample.media}
+                          src={resolveMediaUrl(sample.media_url || sample.media) ?? undefined}
                           alt={sample.title}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                         />

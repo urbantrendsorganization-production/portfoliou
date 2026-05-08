@@ -93,10 +93,12 @@ class WebSocketClient {
     }
   }
 
-  send(data: WSMessage) {
+  send(data: WSMessage): boolean {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(data));
+      return true;
     }
+    return false;
   }
 
   on(type: string, handler: WSEventHandler) {

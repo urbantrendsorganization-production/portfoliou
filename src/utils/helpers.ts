@@ -62,3 +62,21 @@ export function getDisciplineGradient(discipline: string): string {
   };
   return gradients[discipline] || "from-indigo-500 to-purple-500";
 }
+
+/**
+ * Converts an absolute backend media/static URL to a relative path.
+ * Prevents mixed-content (http vs https) issues in production since
+ * nginx proxies /media/ and /static/ paths directly to the backend.
+ */
+export function resolveMediaUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const parsed = new URL(url);
+    if (parsed.pathname.startsWith('/media/') || parsed.pathname.startsWith('/static/')) {
+      return parsed.pathname;
+    }
+  } catch {
+    // Relative URL or non-URL string — return as-is
+  }
+  return url;
+}

@@ -286,18 +286,35 @@ function MessagesContent() {
     setSelectedUser(null);
   }
 
-  function handleSendMessage(e: React.FormEvent) {
+  async function handleSendMessage(e: React.FormEvent) {
     e.preventDefault();
     if (!newMessage.trim() || !selectedUser || !profile) return;
 
-    // Send via WebSocket for real-time delivery
-    wsClient.send({
+    const content = newMessage;
+    setNewMessage("");
+
+    // Try WebSocket first for real-time delivery
+    const sentViaWs = wsClient.send({
       type: "chat_message",
       receiver_id: selectedUser.id,
-      content: newMessage,
+      content,
     });
 
-    setNewMessage("");
+    // WS was disconnected — fall back to REST so the message isn't lost
+    if (!sentViaWs) {
+      try {
+        const msg = await api.messages.send({ receiver: selectedUser.id, content });
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === msg.id)) return prev;
+          return [...prev, msg];
+        });
+        loadConversations();
+      } catch (err) {
+        // Restore message so the user can retry
+        setNewMessage(content);
+        console.error("Failed to send message:", err);
+      }
+    }
   }
 
   function handleTyping() {

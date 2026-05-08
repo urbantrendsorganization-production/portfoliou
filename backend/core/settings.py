@@ -79,9 +79,9 @@ DATABASES = {
     'default': env.db('DATABASE_URL'),
 }
 
-# Redis channel layer (falls back to in-memory for local dev)
+# Redis channel layer (falls back to in-memory for local dev without Redis)
 _redis_url = env('REDIS_URL')
-if _redis_url and not DEBUG:
+if _redis_url:
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",

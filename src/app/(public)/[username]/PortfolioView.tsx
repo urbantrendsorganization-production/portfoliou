@@ -1,6 +1,5 @@
 "use client";
 
-import { SEED_PROFILES, SEED_WORK_SAMPLES } from "@/utils/seed-data";
 import { api } from "@/lib/api";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +15,9 @@ import {
   AtSign,
   Link2,
   Briefcase,
+  Video,
+  X,
+  Play,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -30,13 +32,14 @@ export default function PublicPortfolioPage() {
   const [profile, setProfile] = useState<any>(null);
   const [samples, setSamples] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadPortfolio() {
       const uname = username as string;
       try {
         const timeout = new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("timeout")), 6000)
+          setTimeout(() => reject(new Error("timeout")), 8000)
         );
         const foundProfile = await Promise.race([
           api.profiles.getByUsername(uname),
@@ -51,21 +54,10 @@ export default function PublicPortfolioPage() {
           } catch {
             // work samples unavailable — leave empty
           }
-        } else {
-          // Profile not found in DB — try seed data
-          const seed = SEED_PROFILES.find((p) => p.username === uname);
-          if (seed) {
-            setProfile(seed);
-            setSamples(SEED_WORK_SAMPLES[seed.discipline] ?? []);
-          }
         }
+        // no fallback to seed data — show 404 if not found
       } catch {
-        // Network/timeout — fall back to seed data so the page is never blank
-        const seed = SEED_PROFILES.find((p) => p.username === uname);
-        if (seed) {
-          setProfile(seed);
-          setSamples(SEED_WORK_SAMPLES[seed.discipline] ?? []);
-        }
+        // network/timeout — show 404
       } finally {
         setLoading(false);
       }
@@ -227,44 +219,119 @@ export default function PublicPortfolioPage() {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 flex items-center gap-2">
               Featured Work <Badge className="bg-indigo-600">{samples.length}</Badge>
             </h2>
-            
+
             {samples.length === 0 ? (
               <Card className="p-20 text-center bg-white dark:bg-gray-800 border-2 border-dashed dark:border-gray-700">
                 <p className="text-gray-400 dark:text-gray-500">This creative hasn&apos;t uploaded any work yet.</p>
               </Card>
             ) : (
               <div className="grid sm:grid-cols-2 gap-6">
-                {samples.map((sample) => (
-                  <Card key={sample.id} className="overflow-hidden group cursor-pointer hover:shadow-2xl dark:hover:shadow-black/50 transition-all duration-300">
-                    <div className="aspect-video relative overflow-hidden bg-gray-100 dark:bg-gray-700">
-                      {sample.sample_type === "image" && sample.media ? (
-                        <img
-                          src={resolveMediaUrl(sample.media_url || sample.media) ?? undefined}
-                          alt={sample.title}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-indigo-200">
-                          <ExternalLink className="h-12 w-12" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-6">
-                        <p className="text-white text-sm font-medium">{sample.description}</p>
+                {samples.map((sample) => {
+                  const mediaSrc = resolveMediaUrl(sample.media_url || sample.media);
+                  const isImage = sample.sample_type === "image";
+                  const isVideo = sample.sample_type === "video";
+                  const isLink = sample.sample_type === "link";
+                  let domain = "";
+                  try { if (sample.link) domain = new URL(sample.link).hostname.replace("www.", ""); } catch {}
+
+                  return (
+                    <Card key={sample.id} className="overflow-hidden group cursor-pointer hover:shadow-2xl dark:hover:shadow-black/50 transition-all duration-300">
+                      <div className="aspect-video relative overflow-hidden bg-gray-100 dark:bg-gray-700">
+                        {isImage && mediaSrc && (
+                          <img
+                            src={mediaSrc}
+                            alt={sample.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 cursor-zoom-in"
+                            onClick={() => setLightboxSrc(mediaSrc)}
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                          />
+                        )}
+                        {isVideo && mediaSrc && (
+                          <video
+                            src={mediaSrc}
+                            controls
+                            preload="metadata"
+                            className="w-full h-full object-cover"
+                            poster={resolveMediaUrl(sample.thumbnail_url) ?? undefined}
+                          />
+                        )}
+                        {isVideo && !mediaSrc && (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-800 text-gray-400 gap-2">
+                            <Video className="h-10 w-10" />
+                            <span className="text-xs">Video unavailable</span>
+                          </div>
+                        )}
+                        {isLink && (
+                          <a
+                            href={sample.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40 gap-3 hover:from-indigo-100 hover:to-purple-100 dark:hover:from-indigo-950/60 dark:hover:to-purple-950/60 transition-colors"
+                          >
+                            {domain && (
+                              <img
+                                src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
+                                alt={domain}
+                                className="w-10 h-10 rounded-lg shadow-md"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                              />
+                            )}
+                            <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">{domain || "Visit Link"}</span>
+                            <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+                              <ExternalLink className="h-3 w-3" /> Open in new tab
+                            </span>
+                          </a>
+                        )}
+                        {isImage && mediaSrc && (
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4 pointer-events-none">
+                            <p className="text-white text-sm font-medium line-clamp-2">{sample.description}</p>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    <div className="p-5">
-                      <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center justify-between">
-                        {sample.title}
-                        {sample.link && <ExternalLink className="h-4 w-4" />}
-                      </h3>
-                    </div>
-                  </Card>
-                ))}
+                      <div className="p-5">
+                        <h3 className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center justify-between">
+                          {sample.title}
+                          {isLink && sample.link && (
+                            <a href={sample.link} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                              <ExternalLink className="h-4 w-4 text-indigo-400" />
+                            </a>
+                          )}
+                        </h3>
+                        {sample.description && (
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{sample.description}</p>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Image Lightbox */}
+      {lightboxSrc && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxSrc(null)}
+        >
+          <button
+            onClick={() => setLightboxSrc(null)}
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            aria-label="Close"
+          >
+            <X className="h-6 w-6" />
+          </button>
+          <img
+            src={lightboxSrc}
+            alt="Full size preview"
+            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

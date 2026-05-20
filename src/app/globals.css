@@ -113,3 +113,12 @@ html.dark {
 .animation-delay-600 {
   animation-delay: 600ms;
 }
+
+/* Hide scrollbar while preserving scroll functionality */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

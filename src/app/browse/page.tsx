@@ -26,7 +26,6 @@ import { useEffect, useState } from "react";
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 const BACKEND_BASE = API_URL.replace(/\/api\/?$/, "");
 
-import { SEED_PROFILES } from "@/utils/seed-data";
 
 const DISCIPLINE_COVER_IMAGES: Record<string, string> = {
   "Beauty & Cosmetology":
@@ -124,19 +123,9 @@ export default function BrowsePage() {
       const filtered = discipline
         ? data.filter((p: any) => p.discipline === discipline)
         : data;
-      if (filtered.length > 0) {
-        setTalents(filtered);
-      } else {
-        const seeds = discipline
-          ? SEED_PROFILES.filter((p) => p.discipline === discipline)
-          : SEED_PROFILES;
-        setTalents(seeds);
-      }
+      setTalents(filtered);
     } catch {
-      const seeds = discipline
-        ? SEED_PROFILES.filter((p) => p.discipline === discipline)
-        : SEED_PROFILES;
-      setTalents(seeds);
+      setTalents([]);
     } finally {
       setLoading(false);
     }

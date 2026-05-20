@@ -291,6 +291,14 @@ export function Navbar() {
                 <Briefcase className="h-4 w-4" /> Gigs
               </span>
             </Link>
+            {profile?.role === "client" && (
+              <Link
+                href="/gigs"
+                className="text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded-lg transition-colors"
+              >
+                Post a Gig
+              </Link>
+            )}
 
             <ThemeToggle onDark={!navbarScrolled} />
             {renderAuthButtons(false)}

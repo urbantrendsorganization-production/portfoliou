@@ -24,6 +24,7 @@ import {
   X,
   Save,
   Pencil,
+  Eye,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -51,6 +52,9 @@ export default function PortfolioPage() {
   // File input remount keys — incrementing forces the native <input> to clear
   const [fileInputKey, setFileInputKey] = useState(0);
   const [editFileInputKey, setEditFileInputKey] = useState(0);
+
+  // Preview URL for the new sample form
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const [newSample, setNewSample] = useState({
     title: "",
@@ -92,6 +96,17 @@ export default function PortfolioPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Create/revoke object URL for file preview
+  useEffect(() => {
+    if (!newSample.media) {
+      setPreviewUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(newSample.media);
+    setPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [newSample.media]);
+
   async function loadSamples() {
     try {
       const data = await api.workSamples.list(profile?.id);
@@ -106,6 +121,7 @@ export default function PortfolioPage() {
   function handleNewTypeChange(nextType: string) {
     setNewSample((prev) => ({ ...prev, sample_type: nextType, media: null, link: "" }));
     setFileInputKey((k) => k + 1);
+    setPreviewUrl(null);
   }
 
   function handleEditTypeChange(nextType: string) {
@@ -136,6 +152,7 @@ export default function PortfolioPage() {
 
       setNewSample({ title: "", description: "", sample_type: "image", link: "", media: null });
       setFileInputKey((k) => k + 1);
+      setPreviewUrl(null);
       addToast({ type: "success", title: "Work Added", message: "Your work sample has been added to your portfolio." });
       loadSamples();
     } catch (err: any) {
@@ -390,6 +407,48 @@ export default function PortfolioPage() {
                   rows={3}
                 />
 
+                {/* Live preview — shown when title + media/link is ready */}
+                {newSample.title && (previewUrl || (newSample.sample_type === "link" && newSample.link)) && (() => {
+                  let domain = "";
+                  try { if (newSample.link) domain = new URL(newSample.link).hostname.replace("www.", ""); } catch {}
+                  return (
+                    <div className="rounded-xl border-2 border-indigo-200 dark:border-indigo-800 bg-indigo-50/50 dark:bg-indigo-950/20 overflow-hidden">
+                      <div className="px-3 py-2 flex items-center gap-1.5 border-b border-indigo-100 dark:border-indigo-800">
+                        <Eye className="h-3.5 w-3.5 text-indigo-500" />
+                        <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">Preview</span>
+                      </div>
+                      <div className="aspect-video bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
+                        {newSample.sample_type === "image" && previewUrl && (
+                          <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                        )}
+                        {newSample.sample_type === "video" && previewUrl && (
+                          <video src={previewUrl} controls preload="metadata" className="w-full h-full object-cover" />
+                        )}
+                        {newSample.sample_type === "link" && newSample.link && (
+                          <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40">
+                            {domain && (
+                              <img
+                                src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
+                                alt={domain}
+                                className="w-8 h-8 rounded"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                              />
+                            )}
+                            <span className="text-sm font-semibold text-indigo-600 dark:text-indigo-400">{domain || newSample.link}</span>
+                            <span className="text-xs text-gray-400 flex items-center gap-1"><ExternalLink className="h-3 w-3" />External link</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-3">
+                        <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">{newSample.title}</p>
+                        {newSample.description && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">{newSample.description}</p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {addError && (
                   <div className="flex items-start gap-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800 px-3 py-2.5">
                     <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
@@ -507,21 +566,58 @@ export default function PortfolioPage() {
               <div className="grid sm:grid-cols-2 gap-4">
                 {samples.map((sample) => {
                   const mediaSrc = resolveMediaUrl(sample.media_url || sample.media);
+                  const isImage = sample.sample_type === "image";
+                  const isVideo = sample.sample_type === "video";
+                  const isLink = sample.sample_type === "link";
+                  let domain = "";
+                  try { if (sample.link) domain = new URL(sample.link).hostname.replace("www.", ""); } catch {}
+
                   return (
                     <Card key={sample.id} className="overflow-hidden group">
                       <div className="aspect-video bg-gray-100 dark:bg-gray-700 relative">
-                        {sample.sample_type === "image" && mediaSrc && (
+                        {isImage && mediaSrc && (
                           <img
                             src={mediaSrc}
                             alt={sample.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                          />
+                        )}
+                        {isVideo && mediaSrc && (
+                          <video
+                            src={mediaSrc}
+                            controls
+                            preload="metadata"
                             className="w-full h-full object-cover"
                           />
                         )}
-                        {sample.sample_type === "link" && (
-                          <div className="w-full h-full flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400">
-                            <LinkIcon className="h-8 w-8" />
+                        {isVideo && !mediaSrc && (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-gray-800 text-gray-400 gap-2">
+                            <Video className="h-8 w-8" />
+                            <span className="text-xs">Video unavailable</span>
                           </div>
                         )}
+                        {isLink && (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/40 dark:to-purple-950/40 gap-2">
+                            {domain && (
+                              <img
+                                src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
+                                alt={domain}
+                                className="w-8 h-8 rounded shadow-sm"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                              />
+                            )}
+                            <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 truncate max-w-[80%] text-center">{domain || "Link"}</span>
+                          </div>
+                        )}
+                        {/* Type badge */}
+                        <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-black/60 text-white backdrop-blur-sm">
+                          {isImage && <ImageIcon className="h-3 w-3" />}
+                          {isVideo && <Video className="h-3 w-3" />}
+                          {isLink && <LinkIcon className="h-3 w-3" />}
+                          {sample.sample_type}
+                        </span>
                         <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => openEdit(sample)}

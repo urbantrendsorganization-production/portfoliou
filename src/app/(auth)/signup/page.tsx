@@ -113,6 +113,14 @@ function SignupForm() {
       const updatedProfile = await api.profiles.update(me.id, profileUpdate);
 
       setProfile(updatedProfile);
+
+      // Fire welcome email — best effort, don't block navigation
+      fetch("/api/email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: "welcome", payload: { name, email, role } }),
+      }).catch(() => {});
+
       router.push("/dashboard");
     } catch (err: any) {
       const msg =
